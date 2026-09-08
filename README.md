@@ -9,13 +9,26 @@ Plataforma multiplayer local/remoto no estilo Jackbox Games. Veja [CLAUDE.md](./
 
 ```
 apps/
-  server/       # Servidor Colyseus (Node.js) — fonte da verdade
-  web/          # (Fase 2) App Angular
-  mobile/       # (Fase 3) App Flutter
+  server/     # Servidor Colyseus (Node.js) — fonte da verdade
+  web/        # App Angular (Fase 2, em andamento)
+  mobile/     # App Flutter (Fase 3, ainda não criado)
 packages/
-  shared-types/ # Tipos TS compartilhados (renomeado p/ protocol na Fase 0)
-  games/        # Um jogo por pasta, plugável na Central
+  protocol/   # Contrato: tipos, nomes de evento, schemas zod (compartilhado no lado TS)
+  games/      # Um jogo por pasta, plugável na Central
 ```
+
+## Ambiente de desenvolvimento
+
+- **Node 22** (o Angular CLI 20 exige). Use o `.nvmrc`: `nvm use`. As versões de
+  pacote ficam travadas em `package-lock.json` — sempre `npm ci` (não `npm install`)
+  pra reproduzir a árvore exata.
+- **Servidor + bancos**: `docker compose up` sobe servidor + Postgres 16 + Redis 7
+  juntos. É o único uso de Docker no projeto (ver `CLAUDE.md` §7).
+- **Só o servidor, sem Docker**: `npm run dev` — sobe o Colyseus; Postgres/Redis
+  aparecem como desconectados, mas lobby e jogos funcionam.
+- **Cliente web**: `npm run dev -w @central-de-jogos/web` → http://localhost:4200
+- **Checagens** (as mesmas do CI): `npm run lint` e `npm test` na raiz.
+- **Flutter** (Fase 3): SDK travado por `fvm` quando `apps/mobile` existir.
 
 ## Rodando o servidor localmente (Docker)
 
