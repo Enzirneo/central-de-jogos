@@ -11,7 +11,7 @@ import { Badge, Button, Card, PlayerChip, RoomCode, Screen } from '../../shared/
     <cj-screen>
       <cj-card class="code-card">
         <cj-room-code [code]="store.code()" />
-        <p class="hint">Passe o código pra galera entrar em central-de-jogos</p>
+        <p class="hint">Passe o código pra galera entrar pelo celular</p>
       </cj-card>
 
       <cj-card class="stack">

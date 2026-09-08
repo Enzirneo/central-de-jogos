@@ -12,6 +12,8 @@ import { ColyseusService } from './colyseus.service';
 import type { RoomHandle } from './room-handle';
 
 const RECONNECT_KEY = 'cj.reconnectToken';
+const RECONNECT_ATTEMPTS = 20;
+const RECONNECT_DELAY_MS = 3000;
 
 /**
  * Fonte única do estado da sala no cliente. Assina as mensagens JSON do
@@ -22,9 +24,12 @@ const RECONNECT_KEY = 'cj.reconnectToken';
 export class RoomStore {
   private readonly colyseus = inject(ColyseusService);
   private handle: RoomHandle | null = null;
+  private reconnectToken = '';
 
   readonly connecting = signal(false);
   readonly connected = signal(false);
+  /** true enquanto o cliente tenta voltar depois de uma queda (janela de 60s do servidor). */
+  readonly reconnecting = signal(false);
   readonly error = signal<string | null>(null);
 
   readonly code = signal('');
@@ -93,8 +98,10 @@ export class RoomStore {
 
   private bind(handle: RoomHandle): void {
     this.handle = handle;
+    this.reconnectToken = handle.reconnectionToken;
     this.mySessionId.set(handle.sessionId);
     this.connected.set(true);
+    this.reconnecting.set(false);
     try {
       localStorage.setItem(RECONNECT_KEY, handle.reconnectionToken);
     } catch {
@@ -131,13 +138,42 @@ export class RoomStore {
       this.error.set(e.message);
     });
 
-    handle.onLeave(() => this.connected.set(false));
+    handle.onLeave((code) => {
+      this.connected.set(false);
+      // 1000 = saída limpa (o próprio jogador saiu). Qualquer outro código é
+      // queda: tenta voltar dentro da janela de tolerância do servidor.
+      if (code === 1000 || this.reconnectToken === '') {
+        this.reset();
+      } else {
+        void this.attemptReconnect();
+      }
+    });
     handle.onError((_code, message) => this.error.set(message ?? 'Erro de conexão com a sala.'));
+  }
+
+  private async attemptReconnect(): Promise<void> {
+    if (this.reconnecting()) return;
+    this.reconnecting.set(true);
+    const token = this.reconnectToken;
+
+    for (let i = 0; i < RECONNECT_ATTEMPTS && this.reconnecting(); i++) {
+      try {
+        this.bind(await this.colyseus.reconnect(token));
+        return;
+      } catch {
+        await new Promise((r) => setTimeout(r, RECONNECT_DELAY_MS));
+      }
+    }
+    // não voltou a tempo
+    this.error.set('Você perdeu a conexão com a sala.');
+    this.reset();
   }
 
   private reset(): void {
     this.handle = null;
+    this.reconnectToken = '';
     this.connected.set(false);
+    this.reconnecting.set(false);
     this.code.set('');
     this.phase.set('lobby');
     this.hostId.set('');
