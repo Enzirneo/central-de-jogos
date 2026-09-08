@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/colyseus/room_controller.dart';
+import '../../core/games/game_registry.dart';
 import '../../core/models/catalog.dart';
 import '../../core/theme/tokens.dart';
 import '../../shared/widgets/cj_screen.dart';
@@ -59,6 +60,8 @@ class ReadyCheckPage extends ConsumerWidget {
               ),
             ),
           ),
+          if (gameConfigFor(room.pendingGameId) case final builder?)
+            builder(context),
           FilledButton(
             onPressed: ctrl.toggleReady,
             child: Text(iAmReady ? 'Ainda não…' : 'Estou pronto'),

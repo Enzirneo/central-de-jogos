@@ -12,6 +12,7 @@
 /** Eventos que o cliente envia para o servidor. */
 export const CLIENT_EVENTS = {
   SELECT_GAME: "select_game",
+  SET_GAME_OPTIONS: "set_game_options",
   TOGGLE_READY: "toggle_ready",
   CANCEL_START: "cancel_start",
   GAME_ACTION: "game_action",
@@ -54,6 +55,15 @@ export interface SelectGamePayload {
   options?: unknown;
 }
 
+/**
+ * `set_game_options`: o host ajusta a configuração do jogo proposto durante a
+ * fase `starting` (ex: modo/rodadas do ITO), antes de todo mundo confirmar.
+ * `options` é opaco — cada jogo valida o seu formato em `createInitialState`.
+ */
+export interface SetGameOptionsPayload {
+  options: unknown;
+}
+
 // `toggle_ready` e `cancel_start` não têm payload.
 // `game_action`: payload opaco — o `GamePlugin.applyAction` do jogo ativo valida.
 
@@ -80,6 +90,11 @@ export interface LobbyStatePayload {
   activeGameId: string;
   /** Id do jogo proposto, aguardando confirmação; só durante `starting`. */
   pendingGameId: string;
+  /**
+   * Configuração escolhida pelo host pro jogo proposto (opaca). `null` fora de
+   * `starting`. Todos os jogadores recebem pra ver o que o host configurou.
+   */
+  pendingGameOptions: unknown;
   players: LobbyPlayerView[];
 }
 

@@ -295,7 +295,7 @@ as bool,
 /// @nodoc
 mixin _$LobbyStatePayload {
 
- String get code; RoomPhase get phase; String get hostId; String get activeGameId; String get pendingGameId; List<LobbyPlayer> get players;
+ String get code; RoomPhase get phase; String get hostId; String get activeGameId; String get pendingGameId; Object? get pendingGameOptions; List<LobbyPlayer> get players;
 /// Create a copy of LobbyStatePayload
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -309,20 +309,20 @@ $LobbyStatePayloadCopyWith<LobbyStatePayload> get copyWith => _$LobbyStatePayloa
 @override
 bool operator ==(Object other) {
   final _this = this as LobbyStatePayload;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LobbyStatePayload&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.phase, _this.phase) || other.phase == _this.phase)&&(identical(other.hostId, _this.hostId) || other.hostId == _this.hostId)&&(identical(other.activeGameId, _this.activeGameId) || other.activeGameId == _this.activeGameId)&&(identical(other.pendingGameId, _this.pendingGameId) || other.pendingGameId == _this.pendingGameId)&&const DeepCollectionEquality().equals(other.players, _this.players));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LobbyStatePayload&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.phase, _this.phase) || other.phase == _this.phase)&&(identical(other.hostId, _this.hostId) || other.hostId == _this.hostId)&&(identical(other.activeGameId, _this.activeGameId) || other.activeGameId == _this.activeGameId)&&(identical(other.pendingGameId, _this.pendingGameId) || other.pendingGameId == _this.pendingGameId)&&const DeepCollectionEquality().equals(other.pendingGameOptions, _this.pendingGameOptions)&&const DeepCollectionEquality().equals(other.players, _this.players));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as LobbyStatePayload;
-  return Object.hash(runtimeType,_this.code,_this.phase,_this.hostId,_this.activeGameId,_this.pendingGameId,const DeepCollectionEquality().hash(_this.players));
+  return Object.hash(runtimeType,_this.code,_this.phase,_this.hostId,_this.activeGameId,_this.pendingGameId,const DeepCollectionEquality().hash(_this.pendingGameOptions),const DeepCollectionEquality().hash(_this.players));
 }
 
 @override
 String toString() {
   final _this = this as LobbyStatePayload;
-  return 'LobbyStatePayload(code: ${_this.code}, phase: ${_this.phase}, hostId: ${_this.hostId}, activeGameId: ${_this.activeGameId}, pendingGameId: ${_this.pendingGameId}, players: ${_this.players})';
+  return 'LobbyStatePayload(code: ${_this.code}, phase: ${_this.phase}, hostId: ${_this.hostId}, activeGameId: ${_this.activeGameId}, pendingGameId: ${_this.pendingGameId}, pendingGameOptions: ${_this.pendingGameOptions}, players: ${_this.players})';
 }
 
 
@@ -333,7 +333,7 @@ abstract mixin class $LobbyStatePayloadCopyWith<$Res>  {
   factory $LobbyStatePayloadCopyWith(LobbyStatePayload value, $Res Function(LobbyStatePayload) _then) = _$LobbyStatePayloadCopyWithImpl;
 @useResult
 $Res call({
- String code, RoomPhase phase, String hostId, String activeGameId, String pendingGameId, List<LobbyPlayer> players
+ String code, RoomPhase phase, String hostId, String activeGameId, String pendingGameId, Object? pendingGameOptions, List<LobbyPlayer> players
 });
 
 
@@ -350,14 +350,14 @@ class _$LobbyStatePayloadCopyWithImpl<$Res>
 
 /// Create a copy of LobbyStatePayload
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? code = null,Object? phase = null,Object? hostId = null,Object? activeGameId = null,Object? pendingGameId = null,Object? players = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? code = null,Object? phase = null,Object? hostId = null,Object? activeGameId = null,Object? pendingGameId = null,Object? pendingGameOptions = freezed,Object? players = null,}) {
   return _then(LobbyStatePayload(
 code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
 as RoomPhase,hostId: null == hostId ? _self.hostId : hostId // ignore: cast_nullable_to_non_nullable
 as String,activeGameId: null == activeGameId ? _self.activeGameId : activeGameId // ignore: cast_nullable_to_non_nullable
 as String,pendingGameId: null == pendingGameId ? _self.pendingGameId : pendingGameId // ignore: cast_nullable_to_non_nullable
-as String,players: null == players ? _self.players : players // ignore: cast_nullable_to_non_nullable
+as String,pendingGameOptions: freezed == pendingGameOptions ? _self.pendingGameOptions : pendingGameOptions ,players: null == players ? _self.players : players // ignore: cast_nullable_to_non_nullable
 as List<LobbyPlayer>,
   ));
 }
@@ -443,10 +443,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String code,  RoomPhase phase,  String hostId,  String activeGameId,  String pendingGameId,  List<LobbyPlayer> players)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String code,  RoomPhase phase,  String hostId,  String activeGameId,  String pendingGameId,  Object? pendingGameOptions,  List<LobbyPlayer> players)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LobbyStatePayload() when $default != null:
-return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pendingGameId,_that.players);case _:
+return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pendingGameId,_that.pendingGameOptions,_that.players);case _:
   return orElse();
 
 }
@@ -464,10 +464,10 @@ return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pen
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String code,  RoomPhase phase,  String hostId,  String activeGameId,  String pendingGameId,  List<LobbyPlayer> players)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String code,  RoomPhase phase,  String hostId,  String activeGameId,  String pendingGameId,  Object? pendingGameOptions,  List<LobbyPlayer> players)  $default,) {final _that = this;
 switch (_that) {
 case _LobbyStatePayload():
-return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pendingGameId,_that.players);case _:
+return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pendingGameId,_that.pendingGameOptions,_that.players);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -484,10 +484,10 @@ return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pen
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String code,  RoomPhase phase,  String hostId,  String activeGameId,  String pendingGameId,  List<LobbyPlayer> players)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String code,  RoomPhase phase,  String hostId,  String activeGameId,  String pendingGameId,  Object? pendingGameOptions,  List<LobbyPlayer> players)?  $default,) {final _that = this;
 switch (_that) {
 case _LobbyStatePayload() when $default != null:
-return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pendingGameId,_that.players);case _:
+return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pendingGameId,_that.pendingGameOptions,_that.players);case _:
   return null;
 
 }
@@ -499,7 +499,7 @@ return $default(_that.code,_that.phase,_that.hostId,_that.activeGameId,_that.pen
 @JsonSerializable()
 
 class _LobbyStatePayload implements LobbyStatePayload {
-  const _LobbyStatePayload({required this.code, required this.phase, required this.hostId, this.activeGameId = '', this.pendingGameId = '',  List<LobbyPlayer> players = const []}): _players = players;
+  const _LobbyStatePayload({required this.code, required this.phase, required this.hostId, this.activeGameId = '', this.pendingGameId = '', this.pendingGameOptions,  List<LobbyPlayer> players = const []}): _players = players;
   factory _LobbyStatePayload.fromJson(Map<String, dynamic> json) => _$LobbyStatePayloadFromJson(json);
 
 @override final  String code;
@@ -507,6 +507,7 @@ class _LobbyStatePayload implements LobbyStatePayload {
 @override final  String hostId;
 @override@JsonKey() final  String activeGameId;
 @override@JsonKey() final  String pendingGameId;
+@override final  Object? pendingGameOptions;
  final  List<LobbyPlayer> _players;
 @override@JsonKey() List<LobbyPlayer> get players {
   if (_players is EqualUnmodifiableListView) return _players;
@@ -528,18 +529,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LobbyStatePayload&&(identical(other.code, code) || other.code == code)&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.hostId, hostId) || other.hostId == hostId)&&(identical(other.activeGameId, activeGameId) || other.activeGameId == activeGameId)&&(identical(other.pendingGameId, pendingGameId) || other.pendingGameId == pendingGameId)&&const DeepCollectionEquality().equals(other.players, _players));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LobbyStatePayload&&(identical(other.code, code) || other.code == code)&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.hostId, hostId) || other.hostId == hostId)&&(identical(other.activeGameId, activeGameId) || other.activeGameId == activeGameId)&&(identical(other.pendingGameId, pendingGameId) || other.pendingGameId == pendingGameId)&&const DeepCollectionEquality().equals(other.pendingGameOptions, pendingGameOptions)&&const DeepCollectionEquality().equals(other.players, _players));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,code,phase,hostId,activeGameId,pendingGameId,const DeepCollectionEquality().hash(_players));
+    return Object.hash(runtimeType,code,phase,hostId,activeGameId,pendingGameId,const DeepCollectionEquality().hash(pendingGameOptions),const DeepCollectionEquality().hash(_players));
 }
 
 @override
 String toString() {
-    return 'LobbyStatePayload(code: $code, phase: $phase, hostId: $hostId, activeGameId: $activeGameId, pendingGameId: $pendingGameId, players: $players)';
+    return 'LobbyStatePayload(code: $code, phase: $phase, hostId: $hostId, activeGameId: $activeGameId, pendingGameId: $pendingGameId, pendingGameOptions: $pendingGameOptions, players: $players)';
 }
 
 
@@ -550,7 +551,7 @@ abstract mixin class _$LobbyStatePayloadCopyWith<$Res> implements $LobbyStatePay
   factory _$LobbyStatePayloadCopyWith(_LobbyStatePayload value, $Res Function(_LobbyStatePayload) _then) = __$LobbyStatePayloadCopyWithImpl;
 @override @useResult
 $Res call({
- String code, RoomPhase phase, String hostId, String activeGameId, String pendingGameId, List<LobbyPlayer> players
+ String code, RoomPhase phase, String hostId, String activeGameId, String pendingGameId, Object? pendingGameOptions, List<LobbyPlayer> players
 });
 
 
@@ -567,14 +568,14 @@ class __$LobbyStatePayloadCopyWithImpl<$Res>
 
 /// Create a copy of LobbyStatePayload
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? code = null,Object? phase = null,Object? hostId = null,Object? activeGameId = null,Object? pendingGameId = null,Object? players = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? code = null,Object? phase = null,Object? hostId = null,Object? activeGameId = null,Object? pendingGameId = null,Object? pendingGameOptions = freezed,Object? players = null,}) {
   return _then(_LobbyStatePayload(
 code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
 as RoomPhase,hostId: null == hostId ? _self.hostId : hostId // ignore: cast_nullable_to_non_nullable
 as String,activeGameId: null == activeGameId ? _self.activeGameId : activeGameId // ignore: cast_nullable_to_non_nullable
 as String,pendingGameId: null == pendingGameId ? _self.pendingGameId : pendingGameId // ignore: cast_nullable_to_non_nullable
-as String,players: null == players ? _self._players : players // ignore: cast_nullable_to_non_nullable
+as String,pendingGameOptions: freezed == pendingGameOptions ? _self.pendingGameOptions : pendingGameOptions ,players: null == players ? _self._players : players // ignore: cast_nullable_to_non_nullable
 as List<LobbyPlayer>,
   ));
 }

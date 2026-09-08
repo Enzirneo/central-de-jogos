@@ -70,6 +70,7 @@ class RoomController extends Notifier<RoomState> {
         hostId: s.hostId,
         activeGameId: s.activeGameId,
         pendingGameId: s.pendingGameId,
+        pendingGameOptions: s.pendingGameOptions,
         players: s.players,
         gameState: s.phase == RoomPhase.playing ? state.gameState : null,
         results: s.phase == RoomPhase.lobby ? state.results : null,
@@ -129,6 +130,10 @@ class RoomController extends Notifier<RoomState> {
         ClientEvents.selectGame,
         {'gameId': gameId, 'options': ?options},
       );
+
+  /// Host ajusta a config do jogo proposto durante a fase `starting`.
+  void setGameOptions(Object options) =>
+      _handle?.send(ClientEvents.setGameOptions, {'options': options});
 
   void toggleReady() => _handle?.send(ClientEvents.toggleReady);
 

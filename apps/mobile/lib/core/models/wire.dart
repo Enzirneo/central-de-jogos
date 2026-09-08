@@ -20,6 +20,7 @@ enum RoomPhase {
 /// Nomes de evento (`snake_case`, CLAUDE.md §6).
 abstract final class ClientEvents {
   static const selectGame = 'select_game';
+  static const setGameOptions = 'set_game_options';
   static const toggleReady = 'toggle_ready';
   static const cancelStart = 'cancel_start';
   static const gameAction = 'game_action';
@@ -54,6 +55,7 @@ abstract class LobbyStatePayload with _$LobbyStatePayload {
     required String hostId,
     @Default('') String activeGameId,
     @Default('') String pendingGameId,
+    Object? pendingGameOptions,
     @Default([]) List<LobbyPlayer> players,
   }) = _LobbyStatePayload;
 

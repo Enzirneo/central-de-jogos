@@ -127,6 +127,51 @@ test("payload malformado de select_game vira start_game_error", async () => {
   const err = await rec.next(SERVER_EVENTS.START_GAME_ERROR);
   assert.match(err.message, /inválida/i);
 });
+
+test("set_game_options: host ajusta a config, reseta prontos e chega no jogo", async () => {
+  const room = await colyseus.createRoom<any>("lobby", {});
+  const host = await colyseus.connectTo(room, { nickname: "Host" });
+  const g2 = await colyseus.connectTo(room, { nickname: "G2" });
+  const g3 = await colyseus.connectTo(room, { nickname: "G3" });
+  const rec = recorder(host);
+
+  host.send(CLIENT_EVENTS.SELECT_GAME, { gameId: "ito" });
+  await rec.next(SERVER_EVENTS.LOBBY_STATE, (s) => s.phase === "starting");
+
+  host.send(CLIENT_EVENTS.TOGGLE_READY);
+  await rec.next(SERVER_EVENTS.LOBBY_STATE, (s) => s.players.some((p: any) => p.ready));
+
+  host.send(CLIENT_EVENTS.SET_GAME_OPTIONS, {
+    options: { mode: "individual", rounds: { type: "fixed", totalRounds: 2 } },
+  });
+  const afterCfg = await rec.next(
+    SERVER_EVENTS.LOBBY_STATE,
+    (s) => (s.pendingGameOptions as any)?.mode === "individual",
+  );
+  assert.ok(afterCfg.players.every((p: any) => !p.ready), "prontos foram resetados");
+
+  host.send(CLIENT_EVENTS.TOGGLE_READY);
+  g2.send(CLIENT_EVENTS.TOGGLE_READY);
+  g3.send(CLIENT_EVENTS.TOGGLE_READY);
+
+  const gs = await rec.next(SERVER_EVENTS.GAME_STATE);
+  assert.equal(gs.mode, "individual");
+  assert.deepEqual(gs.roundsConfig, { type: "fixed", totalRounds: 2 });
+});
+
+test("set_game_options de quem não é host é recusado", async () => {
+  const room = await colyseus.createRoom<any>("lobby", {});
+  const host = await colyseus.connectTo(room, { nickname: "Host" });
+  const g2 = await colyseus.connectTo(room, { nickname: "G2" });
+  const g3 = await colyseus.connectTo(room, { nickname: "G3" });
+  host.send(CLIENT_EVENTS.SELECT_GAME, { gameId: "ito" });
+  const rec = recorder(g2);
+  await rec.next(SERVER_EVENTS.LOBBY_STATE, (s) => s.phase === "starting");
+
+  g2.send(CLIENT_EVENTS.SET_GAME_OPTIONS, { options: { mode: "individual" } });
+  const err = await rec.next(SERVER_EVENTS.START_GAME_ERROR);
+  assert.match(err.message, /quem criou a sala/i);
+});
 test("saída intencional remove o jogador e passa o host adiante", async () => {
   const room = await colyseus.createRoom<any>("lobby", {});
   const host = await colyseus.connectTo(room, { nickname: "Host" });

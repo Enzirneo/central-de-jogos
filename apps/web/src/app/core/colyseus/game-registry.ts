@@ -14,6 +14,19 @@ export const GAME_REGISTRY: Record<string, () => Promise<Type<unknown>>> = {
   ito: () => import('../../features/games/ito/ito-host').then(m => m.ItoHost),
 };
 
+/**
+ * Telas de configuração pré-jogo (opcionais). Se um jogo tem opções que o host
+ * escolhe antes de começar (modo, rodadas), registra o componente aqui — ele
+ * aparece na tela de "pronto".
+ */
+export const GAME_CONFIG_REGISTRY: Record<string, () => Promise<Type<unknown>>> = {
+  ito: () => import('../../features/games/ito/ito-config').then(m => m.ItoConfig),
+};
+
 export async function loadGameComponent(gameId: string): Promise<Type<unknown> | undefined> {
   return GAME_REGISTRY[gameId]?.();
+}
+
+export async function loadGameConfigComponent(gameId: string): Promise<Type<unknown> | undefined> {
+  return GAME_CONFIG_REGISTRY[gameId]?.();
 }

@@ -36,6 +36,7 @@ function lobbyState(over: Partial<LobbyStatePayload> = {}): LobbyStatePayload {
     hostId: 'me-1',
     activeGameId: '',
     pendingGameId: '',
+    pendingGameOptions: null,
     players: [{ id: 'me-1', nickname: 'Ana', connected: true, ready: false }],
     ...over,
   };

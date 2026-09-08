@@ -13,6 +13,12 @@ export type ItoRoundsConfig =
   | { type: 'fixed'; totalRounds: number }
   | { type: 'endless' };
 
+/** Opções que o host escolhe antes de começar (evento `set_game_options`). */
+export interface ItoStartOptions {
+  mode: ItoMode;
+  rounds: ItoRoundsConfig;
+}
+
 export type ItoPhase = 'giving_clues' | 'organizing' | 'revealed';
 
 export interface ItoCardInfo {

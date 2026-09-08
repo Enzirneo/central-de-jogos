@@ -7,7 +7,11 @@ import type {
   RoomPhase,
 } from "@central-de-jogos/protocol";
 import { CLIENT_EVENTS, SERVER_EVENTS } from "@central-de-jogos/protocol";
-import { joinOptionsSchema, selectGamePayloadSchema } from "../protocol-validation";
+import {
+  joinOptionsSchema,
+  selectGamePayloadSchema,
+  setGameOptionsPayloadSchema,
+} from "../protocol-validation";
 import { generateRoomCode } from "../utils/roomCode";
 import { getGamePlugin } from "../games/registry";
 
@@ -56,6 +60,15 @@ export class LobbyRoom extends Room {
         return;
       }
       this.handleSelectGame(client, parsed.data.gameId, parsed.data.options);
+    });
+
+    this.onMessage(CLIENT_EVENTS.SET_GAME_OPTIONS, (client, message: unknown) => {
+      const parsed = setGameOptionsPayloadSchema.safeParse(message);
+      if (!parsed.success) {
+        this.sendError(client, "Configuração de jogo inválida.");
+        return;
+      }
+      this.handleSetGameOptions(client, parsed.data.options);
     });
 
     this.onMessage(CLIENT_EVENTS.TOGGLE_READY, (client) => {
@@ -178,6 +191,22 @@ export class LobbyRoom extends Room {
     this.broadcastLobbyState();
   }
 
+  private handleSetGameOptions(client: Client, options: unknown) {
+    if (client.sessionId !== this.hostId) {
+      this.sendError(client, "Só quem criou a sala pode configurar o jogo.");
+      return;
+    }
+    if (this.phase !== "starting") {
+      this.sendError(client, "Só dá pra configurar antes do jogo começar.");
+      return;
+    }
+    this.pendingGameOptions = options;
+    // A config mudou — todo mundo reconfirma "pronto" pra ninguém entrar num
+    // modo que não escolheu.
+    this.clearReady();
+    this.broadcastLobbyState();
+  }
+
   private handleToggleReady(client: Client) {
     if (this.phase !== "starting") return;
     const player = this.players.get(client.sessionId);
@@ -265,6 +294,7 @@ export class LobbyRoom extends Room {
       hostId: this.hostId,
       activeGameId: this.activeGameId,
       pendingGameId: this.pendingGameId,
+      pendingGameOptions: this.phase === "starting" ? this.pendingGameOptions ?? null : null,
       players: [...this.players.values()].map((p) => ({ ...p })),
     };
   }
