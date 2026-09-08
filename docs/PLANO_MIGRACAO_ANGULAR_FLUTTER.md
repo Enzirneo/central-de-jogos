@@ -598,11 +598,16 @@ existência de uma "tela mestre"/TV.
     (`tokens.dart` = espelho de `_tokens.scss`), `core/router` (go_router),
     `features/home` (placeholder), `shared/widgets/cj_screen`. CI ganhou job
     `flutter` (analyze + test). `flutter analyze` limpo, 2 testes verdes.
-  - [ ] **`feat/mobile-colyseus-core`** ← RETOMAR AQUI. Transporte WebSocket
-    (`web_socket_channel`) + `RoomController` (Riverpod) + modelos freezed do
-    contrato (espelhar `docs/contrato-wire.md`) + testes com fake. Espelha
-    `apps/web/src/app/core/colyseus/`.
-  - [ ] `feat/mobile-lobby` — home, lobby, ready-check.
+  - [x] `feat/mobile-colyseus-core` — transporte Colyseus **feito na mão**
+    (`web_socket_channel` + `msgpack_dart`; o pacote `colyseus` do pub.dev virou
+    binding FFI). `ColyseusClient`/`ColyseusRoom` falam o frame `ROOM_DATA` do
+    protocolo 0.16, sem tocar `@colyseus/schema`. `RoomController` (Riverpod
+    Notifier) + `RoomState`/`LobbyStatePayload` freezed espelham o `RoomStore`
+    da web (inclui reconexão). Verificado ponta a ponta contra o servidor.
+    9 testes verdes.
+  - [ ] **`feat/mobile-lobby`** ← RETOMAR AQUI. Telas home / lobby / ready-check
+    em `features/`, lendo o `roomControllerProvider`. Espelha
+    `apps/web/src/app/features/{home,lobby,ready-check}/`.
   - [ ] `feat/mobile-game-host` — registry + Contador ponta a ponta.
   - [ ] `feat/mobile-ito` — telas do ITO.
 - [ ] Fase 4 — Paridade, escala e deploy
