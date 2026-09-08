@@ -2,6 +2,18 @@
 
 Este arquivo é a referência de arquitetura do projeto. Leia-o no início de qualquer sessão antes de gerar código. Qualquer decisão que conflite com o que está aqui deve ser discutida com o time antes de ser implementada.
 
+> ⚠️ **MIGRAÇÃO DE STACK EM ANDAMENTO.** Os clientes estão sendo trocados:
+> React Native + Expo → **Angular** (web) e **Flutter** (mobile). O servidor
+> Node + Colyseus e a lógica de jogo em `packages/games/*` **não mudam**.
+>
+> **Antes de qualquer trabalho, leia `docs/PLANO_MIGRACAO_ANGULAR_FLUTTER.md`** e
+> siga o roadmap dele fase por fase (uma branch por passo, a partir de `dev`).
+> As decisões já fechadas estão na §0 desse plano.
+>
+> As **seções 2, 3 e 7 abaixo descrevem a stack _antes_ da migração** (Expo,
+> `apps/mobile-web`, `packages/ui`) — elas serão reescritas na Fase 4 do plano.
+> Até lá, onde este arquivo divergir do plano de migração, **o plano vence**.
+
 ## 1. Visão geral
 
 **Central de Jogos** é uma plataforma multiplayer local/remoto no estilo Jackbox Games: um grupo de amigos cria uma sala, cada pessoa entra pelo próprio celular, e dentro dessa sala eles jogam jogos do estilo trivia/cartas com bastante interação entre os jogadores.
