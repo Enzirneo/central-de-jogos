@@ -619,9 +619,14 @@ existência de uma "tela mestre"/TV.
     (`kotlin.incremental=false`), `fix/mobile-cleartext-dev`
     (`usesCleartextTraffic` no debug manifest), `fix/mobile-lobby-state-parse`
     (normalização do msgpack + buffer da 1ª mensagem).
+  - [x] `feat/ito-config` — evento `set_game_options` (host ajusta modo/rodadas
+    na tela de "pronto"); registro de config por jogo; modos **Em equipe** /
+    **Cada um por si**. O modo individual já existia no servidor.
+  - [x] `feat/ito-drag-drop` — arrastar as cartas (`ReorderableListView` mobile,
+    `@angular/cdk` web) no lugar de tocar + setas.
 
-  **➡️ Mobile MVP: paridade com a web** (lobby, ready-check, Contador, ITO,
-  reconexão). **RETOMAR: Fase 4** — polir/testar num aparelho real, decidir
-  hospedagem do servidor e subir staging (web + mobile + servidor).
+  **➡️ Mobile MVP: paridade com a web** (lobby, ready-check, Contador, ITO com
+  modos e drag-drop, reconexão). **RETOMAR: Fase 4** — polir/testar num aparelho
+  real, decidir hospedagem do servidor e subir staging (web + mobile + servidor).
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
