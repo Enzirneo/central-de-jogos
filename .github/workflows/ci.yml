@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20 # mesma major do apps/server/Dockerfile
+          node-version: 22 # exigido pelo Angular CLI 20 (apps/web)
           cache: npm
 
       - run: npm ci

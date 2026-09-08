@@ -4,7 +4,7 @@
 # O docker-compose.yml na raiz já faz isso automaticamente.
 
 # ---- Stage 1: instala dependências e compila o TypeScript ----
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Manifests de todo o monorepo primeiro, para aproveitar o cache de camadas
@@ -32,7 +32,7 @@ RUN npx turbo run build --filter=@central-de-jogos/server
 RUN npm prune --omit=dev --workspace=@central-de-jogos/server --include-workspace-root
 
 # ---- Stage 2: imagem enxuta só com o necessário para rodar ----
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
