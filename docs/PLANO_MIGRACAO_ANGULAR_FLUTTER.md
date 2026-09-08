@@ -546,7 +546,18 @@ existência de uma "tela mestre"/TV.
   `ALLOWED_ORIGINS`; teste de integração `apps/server/src/rooms/LobbyRoom.test.ts`
   (fluxo completo + recusas). Pendência menor: teste dedicado de reconexão com
   fake timers (o `allowReconnection` de 60 s seguraria o processo).
-- [ ] Fase 2 — Web (Angular) MVP — **aguardando a referência visual do usuário**
+- [~] **Fase 2 — Web (Angular) MVP** — em andamento:
+  - [x] Referência visual definida (base: projeto `organo`) e preview aprovado
+    (`docs/preview-visual.html`).
+  - [x] `feat/web-scaffold` — Angular 20 em `apps/web`, workspace npm, Vitest
+    (`@angular/build:unit-test`), Node 22 no CI/Dockerfile.
+  - [x] `feat/web-design-system` — `styles/_tokens.scss` + `_mixins.scss` +
+    `shared/ui` (Button, Card, RoomCode, Badge, PlayerChip, TextField, Screen,
+    `burstConfetti`).
+  - [ ] `feat/web-colyseus-core` — `ColyseusService` + `RoomStore` (signals) + fake.
+  - [ ] `feat/web-lobby` — home (criar/entrar), lobby, ready-check.
+  - [ ] `feat/web-game-host` + `feat/web-ito` — container + telas do ITO.
+  - [ ] `chore/web-deploy` — Vercel.
 - [ ] Fase 3 — Mobile (Flutter) MVP
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
