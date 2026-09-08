@@ -1,4 +1,4 @@
-import type { GamePlugin, GameResults, PlayerId } from "@central-de-jogos/shared-types";
+import type { GamePlugin, GameResults, PlayerId } from "@central-de-jogos/protocol";
 import { ITO_THEMES } from "./themes";
 import type {
   ItoAction,

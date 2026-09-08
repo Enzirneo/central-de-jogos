@@ -10,7 +10,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@central-de-jogos/shared-types": "*"
+    "@central-de-jogos/protocol": "*"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

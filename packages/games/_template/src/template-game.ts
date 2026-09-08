@@ -1,4 +1,4 @@
-import type { GamePlugin, GameResults, PlayerId } from "@central-de-jogos/shared-types";
+import type { GamePlugin, GameResults, PlayerId } from "@central-de-jogos/protocol";
 
 /** Quantas vezes cada jogador precisa clicar até o jogo terminar. */
 export const TARGET_COUNT = 5;

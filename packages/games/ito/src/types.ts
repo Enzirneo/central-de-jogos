@@ -1,4 +1,4 @@
-import type { PlayerId } from "@central-de-jogos/shared-types";
+import type { PlayerId } from "@central-de-jogos/protocol";
 
 export type ItoMode = "consensus" | "individual";
 

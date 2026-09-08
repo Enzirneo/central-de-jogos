@@ -12,7 +12,7 @@
   "dependencies": {
     "@central-de-jogos/game-ito": "*",
     "@central-de-jogos/game-template": "*",
-    "@central-de-jogos/shared-types": "*",
+    "@central-de-jogos/protocol": "*",
     "@colyseus/core": "0.16.24",
     "@colyseus/schema": "^3.0.0",
     "@colyseus/ws-transport": "^0.16.0",
