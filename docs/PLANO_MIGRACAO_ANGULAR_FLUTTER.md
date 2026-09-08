@@ -538,9 +538,15 @@ existência de uma "tela mestre"/TV.
 
 ## 12. Progresso
 
-- [ ] Fase 0 — Limpeza e contrato
-- [ ] Fase 1 — Servidor + spike
-- [ ] Fase 2 — Web (Angular) MVP
+- [x] **Fase 0 — Limpeza, contrato e CI** — clientes React removidos;
+  `shared-types` → `protocol` com `events.ts` + schemas zod; `docs/contrato-wire.md`;
+  workflow de CI (`.github/workflows/ci.yml`).
+- [x] **Fase 1 — Servidor pronto p/ dois clientes** — `LobbyRoom` sem
+  `@colyseus/schema`, estado via evento JSON `lobby_state`; CORS +
+  `ALLOWED_ORIGINS`; teste de integração `apps/server/src/rooms/LobbyRoom.test.ts`
+  (fluxo completo + recusas). Pendência menor: teste dedicado de reconexão com
+  fake timers (o `allowReconnection` de 60 s seguraria o processo).
+- [ ] Fase 2 — Web (Angular) MVP — **aguardando a referência visual do usuário**
 - [ ] Fase 3 — Mobile (Flutter) MVP
-- [ ] Fase 4 — Paridade, escala, staging
+- [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)

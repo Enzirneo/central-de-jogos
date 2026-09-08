@@ -383,8 +383,8 @@
       tecnologias. O produto — plataforma multiplayer estilo Jackbox, salas, jogos plugáveis —
       não muda. O servidor Node&nbsp;+&nbsp;Colyseus permanece a fonte da verdade.</p>
     <div class="status-strip">
-      <span class="pill live">● Planejamento — <strong>nada executado</strong></span>
-      <span class="pill">Decisões de stack <strong>fechadas</strong></span>
+      <span class="pill live">● Fases 0 e 1 <strong>concluídas</strong> — em <code>dev</code></span>
+      <span class="pill">Próximo: <strong>Fase 2 (Angular)</strong>, aguardando referência visual</span>
       <span class="pill">Espelha <strong>docs/PLANO_MIGRACAO_ANGULAR_FLUTTER.md</strong></span>
       <span class="pill">Roadmap: <strong>6 fases</strong></span>
     </div>
@@ -943,9 +943,9 @@
         <span class="sec-num">12</span>
         <h2>Progresso</h2>
         <ul class="progress">
-          <li><span class="box">[ ]</span> Fase 0 — Limpeza, contrato e CI</li>
-          <li><span class="box">[ ]</span> Fase 1 — Servidor pronto p/ dois clientes</li>
-          <li><span class="box">[ ]</span> Fase 2 — Web (Angular) MVP</li>
+          <li><span class="box" style="color:var(--stays)">[x]</span> <strong>Fase 0 — Limpeza, contrato e CI</strong> — clientes React removidos; <code>shared-types</code> → <code>protocol</code> com <code>events.ts</code> + zod; <code>docs/contrato-wire.md</code>; workflow de CI.</li>
+          <li><span class="box" style="color:var(--stays)">[x]</span> <strong>Fase 1 — Servidor pronto p/ dois clientes</strong> — <code>LobbyRoom</code> sem <code>@colyseus/schema</code>, estado via evento JSON <code>lobby_state</code>; CORS + <code>ALLOWED_ORIGINS</code>; teste de integração do fluxo. Pendência menor: teste de reconexão com fake timers.</li>
+          <li><span class="box">[ ]</span> Fase 2 — Web (Angular) MVP — <em>aguardando a referência visual</em></li>
           <li><span class="box">[ ]</span> Fase 3 — Mobile (Flutter) MVP</li>
           <li><span class="box">[ ]</span> Fase 4 — Paridade, escala e deploy</li>
           <li><span class="box">[ ]</span> Fase 5 — Novos jogos (contínuo)</li>
