@@ -591,7 +591,7 @@ existência de uma "tela mestre"/TV.
   ponta a ponta, com reconexão. Falta só o deploy (Fase 4). **RETOMAR: Fase 3 —
   Flutter** (usuário instalando Android Studio + Flutter SDK; `flutter doctor`
   verde antes de começar).
-- [~] **Fase 3 — Mobile (Flutter) MVP** — em andamento:
+- [~] **Fase 3 — Mobile (Flutter) MVP** — telas prontas; falta só polir/testar no aparelho:
   - [x] `feat/mobile-scaffold` — `apps/mobile` criado (`--platforms=android,ios
     --empty`, fora do workspace npm). Deps: flutter_riverpod, go_router, freezed,
     json_serializable, google_fonts. Estrutura espelha a web: `core/theme`
@@ -611,9 +611,17 @@ existência de uma "tela mestre"/TV.
   - [x] `feat/mobile-game-host` — `game_registry.dart` (`Map<String,
     WidgetBuilder>`), `TemplateCounterPage`, `ResultsPage` (confetti + ranking).
     `SalaPage` prioriza `results` sobre a fase. 16 testes verdes.
-  - [ ] **`feat/mobile-ito`** ← RETOMAR AQUI. Telas do ITO em
-    `features/games/ito/` — espelhar `apps/web/src/app/features/games/ito/`
-    (`ito-host`/`clue`/`board`/`reveal` + `ito.types.ts`). Registrar em
-    `game_registry.dart`. Modos consensus e individual.
+  - [x] `feat/mobile-ito` — `ito_types.dart` (wrappers `ItoView`/`ItoCard`/
+    `ItoRoundResult` sobre o map de `game_state`), `ItoHostPage` +
+    `clue`/`board`/`reveal`. Registrado em `game_registry.dart`. Verificado
+    ponta a ponta contra o servidor (3 jogadores). 19 testes verdes.
+  - Fixes de infra no caminho: `fix/mobile-kotlin-incremental`
+    (`kotlin.incremental=false`), `fix/mobile-cleartext-dev`
+    (`usesCleartextTraffic` no debug manifest), `fix/mobile-lobby-state-parse`
+    (normalização do msgpack + buffer da 1ª mensagem).
+
+  **➡️ Mobile MVP: paridade com a web** (lobby, ready-check, Contador, ITO,
+  reconexão). **RETOMAR: Fase 4** — polir/testar num aparelho real, decidir
+  hospedagem do servidor e subir staging (web + mobile + servidor).
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
