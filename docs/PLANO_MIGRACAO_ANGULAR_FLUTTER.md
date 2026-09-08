@@ -554,9 +554,15 @@ existência de uma "tela mestre"/TV.
   - [x] `feat/web-design-system` — `styles/_tokens.scss` + `_mixins.scss` +
     `shared/ui` (Button, Card, RoomCode, Badge, PlayerChip, TextField, Screen,
     `burstConfetti`).
-  - [ ] `feat/web-colyseus-core` — `ColyseusService` + `RoomStore` (signals) + fake.
-  - [ ] `feat/web-lobby` — home (criar/entrar), lobby, ready-check.
-  - [ ] `feat/web-game-host` + `feat/web-ito` — container + telas do ITO.
+  - [x] `feat/web-colyseus-core` — `ColyseusService` + `RoomStore` (signals) +
+    testes com fake. **Protocolo validado ponta a ponta com `colyseus.js` real
+    contra o servidor** (criar → entrar → select → ready → jogar → game_over).
+  - [x] `feat/web-lobby` — home (criar/entrar), `/sala` (guard + fase), lobby
+    com catálogo, ready-check. Catálogo ganhou `icon`/`accent`/`tagline` por jogo.
+    zod saiu de `packages/protocol` → `apps/server/protocol-validation.ts`.
+  - [ ] `feat/web-game-host` — container que carrega o componente do jogo por
+    registry + tela de resultados (confete).
+  - [ ] `feat/web-ito` — telas do ITO.
   - [ ] `chore/web-deploy` — Vercel.
 - [ ] Fase 3 — Mobile (Flutter) MVP
 - [ ] Fase 4 — Paridade, escala e deploy
