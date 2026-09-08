@@ -560,10 +560,21 @@ existência de uma "tela mestre"/TV.
   - [x] `feat/web-lobby` — home (criar/entrar), `/sala` (guard + fase), lobby
     com catálogo, ready-check. Catálogo ganhou `icon`/`accent`/`tagline` por jogo.
     zod saiu de `packages/protocol` → `apps/server/protocol-validation.ts`.
-  - [ ] `feat/web-game-host` — container que carrega o componente do jogo por
-    registry + tela de resultados (confete).
-  - [ ] `feat/web-ito` — telas do ITO.
-  - [ ] `chore/web-deploy` — Vercel.
+  - [x] `fix/web-protocol-import` — `apps/web` importa `@central-de-jogos/protocol`
+    pelo **código-fonte** (`tsconfig` paths → `packages/protocol/src/index.ts`),
+    porque o dev server do Angular não lê exports nomeados do `dist` CJS. Regra
+    p/ dependências futuras de `packages/*` no web: mesma coisa.
+  - [ ] **`feat/web-game-host`** ← RETOMAR AQUI. Container que troca o componente
+    do jogo por `activeGameId` via um `core/colyseus/game-registry.ts` (mapa
+    `id → () => import('../features/games/<jogo>/...')`, espelha
+    `apps/server/src/games/registry.ts`) + tela de resultados usando
+    `store.results()` e `burstConfetti`. Fazer o `_template` (Contador) rodar
+    ponta a ponta primeiro.
+  - [ ] `feat/web-ito` — telas do ITO em `features/games/ito/`. Reler
+    `packages/games/ito/src/types.ts` (`ItoStateForPlayer`, `ItoAction`,
+    `ItoPhase`) e transformar cada regra num item de checklist.
+  - [ ] `chore/web-deploy` — Vercel (root `apps/web`, build `ng build`, output
+    `apps/web/dist/web/browser`).
 - [ ] Fase 3 — Mobile (Flutter) MVP
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
