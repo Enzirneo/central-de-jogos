@@ -113,6 +113,25 @@ Checklist para adicionar um jogo novo:
 - Nenhum estado de jogo deve ser guardado só no cliente — o servidor é sempre a fonte da verdade (evita trapaça e problemas de sincronização).
 - Todo `GamePlugin` novo precisa de testes unitários cobrindo `applyAction` e `isGameOver` antes de ser exposto na Central.
 
+### Regras de execução (obrigatórias)
+
+Antes de gerar código, aplique também:
+
+- @.claude/rules/clean-code.md — checklist de Clean Code adaptado ao monorepo.
+- @.claude/rules/tdd.md — ciclo Red-Green-Refactor; **nenhuma lógica de jogo nova
+  sem um teste que falhe primeiro**.
+- @.claude/rules/gitflow.md — fluxo `sua-branch → dev → master`, Conventional Commits.
+- @.claude/rules/fluxo-de-trabalho.md — postura geral e o que fazer quando um hook bloquear.
+
+### Enforcement mecânico (hooks)
+
+`.claude/settings.json` liga hooks que **bloqueiam** (exit 2): commit direto em
+`master`, branch fora do padrão `tipo/<descrição>`, PR de trabalho com base
+`master`, escrever lógica de jogo nova sem teste, acumular mudança sem rodar
+teste. Ao receber um bloqueio, **pare e converse** — regra completa em
+@.claude/rules/fluxo-de-trabalho.md. Qualidade de Clean Code e a ordem correta do
+ciclo red-green-refactor **não** são bloqueáveis por script — dependem dos rules.
+
 ## 7. Build e deploy
 
 Nem toda parte do projeto usa a mesma estratégia de build — cada peça tem a ferramenta certa pra ela.

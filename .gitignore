@@ -7,3 +7,9 @@ web-build/
 *.log
 .env
 .DS_Store
+
+# estado local dos hooks .claude (não versionar)
+.claude/tdd-state.json
+.claude/bypass-audit.json
+.claude/tdd-bypass.json
+.claude/gitflow-bypass.json
