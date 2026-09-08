@@ -7,8 +7,8 @@ import '../../../shared/widgets/cj_screen.dart';
 import 'ito_host_page.dart';
 import 'ito_types.dart';
 
-/// Fase `organizing`: ordenar as cartas do menor pro maior só pelas dicas.
-/// Toca num nome, depois ↑/↓. Espelha `ito-board.ts` da web.
+/// Fase `organizing`: arrastar as cartas pra ordenar do menor pro maior, só
+/// pelas dicas. Espelha `ito-board.ts` da web.
 class ItoBoardPage extends ConsumerStatefulWidget {
   const ItoBoardPage({super.key, required this.state});
   final ItoView state;
@@ -19,7 +19,6 @@ class ItoBoardPage extends ConsumerStatefulWidget {
 
 class _ItoBoardPageState extends ConsumerState<ItoBoardPage> {
   List<String>? _order;
-  int? _selected;
 
   /// Cópia de trabalho: reseta quando o servidor manda um quadro novo.
   List<String> get _working {
@@ -33,16 +32,12 @@ class _ItoBoardPageState extends ConsumerState<ItoBoardPage> {
   bool _sameSet(List<String> a, List<String> b) =>
       a.length == b.length && a.toSet().containsAll(b);
 
-  void _move(int dir) {
-    final i = _selected;
-    if (i == null || i + dir < 0 || i + dir >= _working.length) return;
+  /// `newIndex` já vem ajustado pra remoção em `oldIndex`.
+  void _onReorderItem(int oldIndex, int newIndex) {
     setState(() {
       final next = List.of(_working);
-      final tmp = next[i];
-      next[i] = next[i + dir];
-      next[i + dir] = tmp;
+      next.insert(newIndex, next.removeAt(oldIndex));
       _order = next;
-      _selected = i + dir;
     });
     ref
         .read(roomControllerProvider.notifier)
@@ -75,75 +70,63 @@ class _ItoBoardPageState extends ConsumerState<ItoBoardPage> {
             ),
             const SizedBox(height: 4),
             Text('Do menor pro maior', style: text.headlineSmall),
-            Text('Só as dicas — nada de dizer números.',
+            Text('Segura e arrasta pra ordenar. Só as dicas — nada de números.',
+                textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: CjTokens.muted)),
           ]),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                spacing: 6,
-                children: [
-                  for (final (i, id) in order.indexed)
-                    InkWell(
-                      borderRadius: BorderRadius.circular(10),
-                      onTap: () => setState(() => _selected = _selected == i ? null : i),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: CjTokens.surface2.withValues(alpha: 0.5),
-                          border: Border.all(
-                            color: _selected == i ? itoAccent : CjTokens.border,
-                          ),
-                        ),
-                        child: Row(
+          ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: order.length,
+            onReorderItem: _onReorderItem,
+            proxyDecorator: (child, _, _) => Material(
+              color: Colors.transparent,
+              child: child,
+            ),
+            itemBuilder: (context, i) {
+              final id = order[i];
+              return Padding(
+                key: ValueKey(id),
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: CjTokens.surface2.withValues(alpha: 0.6),
+                    border: Border.all(color: CjTokens.border),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 26,
+                        child: Text('${i + 1}',
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.w700,
+                              color: CjTokens.muted,
+                            )),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              width: 26,
-                              child: Text('${i + 1}',
-                                  style: TextStyle(
-                                    fontFamily: 'monospace',
-                                    fontWeight: FontWeight.w700,
-                                    color: CjTokens.muted,
-                                  )),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(id == me ? '${nameOf(id)} (você)' : nameOf(id),
-                                      style: const TextStyle(fontWeight: FontWeight.w500)),
-                                  Text('"${s.cards[id]?.clue ?? '…'}"',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontStyle: FontStyle.italic,
-                                          color: CjTokens.muted)),
-                                ],
-                              ),
-                            ),
+                            Text(id == me ? '${nameOf(id)} (você)' : nameOf(id),
+                                style: const TextStyle(fontWeight: FontWeight.w500)),
+                            Text('"${s.cards[id]?.clue ?? '…'}"',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                    color: CjTokens.muted)),
                           ],
                         ),
                       ),
-                    ),
-                ],
-              ),
-            ),
+                      Icon(Icons.drag_handle, color: CjTokens.muted, size: 20),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
-          Row(spacing: 8, children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _selected == null ? null : () => _move(-1),
-                child: const Text('↑ subir'),
-              ),
-            ),
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _selected == null ? null : () => _move(1),
-                child: const Text('↓ descer'),
-              ),
-            ),
-          ]),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),

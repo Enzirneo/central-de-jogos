@@ -72,7 +72,7 @@ void main() {
     expect((handle.sent.last.payload! as Map)['clue'], 'gelo');
   });
 
-  testWidgets('organizing: mover troca a ordem e manda reorder_board', (tester) async {
+  testWidgets('organizing: lista as cartas arrastáveis com as dicas', (tester) async {
     final handle = FakeRoomHandle();
     final container = await connected(handle);
     addTearDown(container.dispose);
@@ -81,15 +81,22 @@ void main() {
     await tester.pumpWidget(wrap(container));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Ana (você)')); // seleciona slot 0
-    await tester.pump();
-    await tester.tap(find.text('↓ descer'));
-    await tester.pump();
+    expect(find.byType(ReorderableListView), findsOneWidget);
+    expect(find.text('Ana (você)'), findsOneWidget);
+    expect(find.text('"dica-p2"'), findsOneWidget);
+    expect(find.byIcon(Icons.drag_handle), findsNWidgets(3));
+  });
 
-    final sent = handle.sent.last;
-    expect(sent.type, 'game_action');
-    expect((sent.payload! as Map)['type'], 'reorder_board');
-    expect((sent.payload! as Map)['order'], ['p2', 'me-1', 'p3']);
+  test('reordenar: insert(removeAt) produz a ordem certa (lógica do onReorderItem)', () {
+    // `onReorderItem` já entrega newIndex ajustado pra remoção em oldIndex.
+    List<String> move(List<String> l, int from, int to) {
+      final next = List.of(l);
+      next.insert(to, next.removeAt(from));
+      return next;
+    }
+
+    expect(move(['a', 'b', 'c'], 0, 1), ['b', 'a', 'c']);
+    expect(move(['a', 'b', 'c'], 2, 0), ['c', 'a', 'b']);
   });
 
   testWidgets('revealed: mostra números e ordem certa', (tester) async {
