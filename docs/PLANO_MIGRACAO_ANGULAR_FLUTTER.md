@@ -570,11 +570,14 @@ existência de uma "tela mestre"/TV.
     `game-host.ts` carrega dinamicamente com `NgComponentOutlet` + tela de
     resultados com `store.results()` e `burstConfetti` + componente `_template`
     (contador) funcionando ponta a ponta (lint + testes verdes).
-  - [ ] **`feat/web-ito`** ← RETOMAR AQUI. Telas do ITO em `features/games/ito/`.
-    Reler `packages/games/ito/src/types.ts` (`ItoStateForPlayer`, `ItoAction`,
-    `ItoPhase`) e transformar cada regra num item de checklist. Registry já suporta
-    import dinâmico — só adicionar a linha comentada em `game-registry.ts`.
-  - [ ] `chore/web-deploy` — Vercel (root `apps/web`, build `ng build`, output
+  - [x] **`feat/web-ito`**. Telas do ITO em `features/games/ito/`:
+    - `ito-host.ts` — container que coordena as fases (giving_clues, organizing, revealed)
+    - `ito-clue.ts` — fase de envio de dicas com countdown de caracteres
+    - `ito-board.ts` — fase de reorganização do quadro (clique + botões ↑↓)
+    - `ito-reveal.ts` — revelação com comparação à ordem correta
+    - Suporta modos consensus (quadro compartilhado) e individual (palpites privados)
+    - Registrado no `game-registry.ts`; lint + build verdes.
+  - [ ] **`chore/web-deploy`** ← RETOMAR AQUI. Vercel (root `apps/web`, build `ng build`, output
     `apps/web/dist/web/browser`).
 - [ ] Fase 3 — Mobile (Flutter) MVP
 - [ ] Fase 4 — Paridade, escala e deploy
