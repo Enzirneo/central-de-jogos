@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:msgpack_dart/msgpack_dart.dart' as msgpack;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'msgpack_json.dart';
 import 'room_handle.dart';
 
 /// Cliente Colyseus mínimo, feito na mão. Fala só a parte do protocolo 0.16 que
@@ -121,14 +122,23 @@ class ColyseusRoom implements RoomHandle {
   final _messageHandlers = <String, void Function(Object?)>{};
   final _leaveHandlers = <void Function(int)>[];
   final _errorHandlers = <void Function(int, String?)>[];
+  // Mensagens que chegaram antes do handler do tipo ser registrado (o servidor
+  // manda o primeiro `lobby_state` logo depois do join). Entregues no onMessage.
+  final _pending = <({String type, Object? payload})>[];
   final _joined = Completer<void>();
   bool _hasJoined = false;
 
   Future<void> _waitForJoin() => _joined.future;
 
   @override
-  void onMessage(String type, void Function(Object? payload) handler) =>
-      _messageHandlers[type] = handler;
+  void onMessage(String type, void Function(Object? payload) handler) {
+    _messageHandlers[type] = handler;
+    _pending.removeWhere((m) {
+      if (m.type != type) return false;
+      handler(m.payload);
+      return true;
+    });
+  }
 
   @override
   void onLeave(void Function(int code) handler) => _leaveHandlers.add(handler);
@@ -188,9 +198,14 @@ class ColyseusRoom implements RoomHandle {
     offset++;
     final type = utf8.decode(bytes.sublist(offset, offset += len));
     final payload = offset < bytes.length
-        ? msgpack.deserialize(bytes.sublist(offset))
+        ? normalizeMsgpackJson(msgpack.deserialize(bytes.sublist(offset)))
         : null;
-    _messageHandlers[type]?.call(payload);
+    final handler = _messageHandlers[type];
+    if (handler != null) {
+      handler(payload);
+    } else {
+      _pending.add((type: type, payload: payload));
+    }
   }
 
   void _handleError(Uint8List bytes) {
