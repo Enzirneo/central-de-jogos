@@ -10,18 +10,20 @@ Future<void> main() async {
   final client = ColyseusClient('http://localhost:2567');
 
   final host = await client.create('Ana');
-  String? code;
-  host.onMessage(ServerEvents.lobbyState, (p) => code = (p! as Map)['code'] as String);
+  LobbyStatePayload? hostLobby;
+  host.onMessage(ServerEvents.lobbyState,
+      (p) => hostLobby = LobbyStatePayload.fromJson(p! as Map<String, dynamic>));
   await Future<void>.delayed(const Duration(milliseconds: 300));
-  print('sala criada, código: $code  (sessionId=${host.sessionId})');
+  print('sala criada, código: ${hostLobby?.code}  (sessionId=${host.sessionId})');
   print('reconnectionToken: ${host.reconnectionToken}');
 
-  final guest = await client.join(code!, 'Beto');
-  Map? lastLobby;
-  guest.onMessage(ServerEvents.lobbyState, (p) => lastLobby = p as Map?);
+  final guest = await client.join(hostLobby!.code, 'Beto');
+  LobbyStatePayload? lastLobby;
+  guest.onMessage(ServerEvents.lobbyState,
+      (p) => lastLobby = LobbyStatePayload.fromJson(p! as Map<String, dynamic>));
   await Future<void>.delayed(const Duration(milliseconds: 300));
   print('guest entrou. jogadores: '
-      '${(lastLobby?['players'] as List?)?.map((p) => p['nickname']).toList()}');
+      '${lastLobby?.players.map((p) => p.nickname).toList()}');
 
   Map? over;
   guest.onMessage(ServerEvents.gameOver, (p) => over = p as Map?);
@@ -33,7 +35,7 @@ Future<void> main() async {
   host.send('toggle_ready');
   guest.send('toggle_ready');
   await Future<void>.delayed(const Duration(milliseconds: 400));
-  print('fase: ${lastLobby?['phase']}  gameState inicial: $gs');
+  print('fase: ${lastLobby?.phase}  gameState inicial: $gs');
 
   for (var i = 0; i < 6; i++) {
     host.send('game_action', {'type': 'increment'});
