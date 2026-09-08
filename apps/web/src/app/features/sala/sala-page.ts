@@ -4,33 +4,31 @@ import { RoomStore } from '../../core/colyseus/room.store';
 import { Lobby } from '../lobby/lobby';
 import { ReadyCheck } from '../ready-check/ready-check';
 import { GameHost } from '../game-host/game-host';
+import { Results } from '../results/results';
 
 /**
- * Container da sala. Uma rota só (/sala) — a tela mostrada segue a fase do
- * servidor (lobby / starting / playing), evitando dessincronizar rota e estado.
+ * Container da sala. Uma rota só (/sala) — a tela mostrada segue o estado do
+ * servidor: resultado de jogo (se houver) tem prioridade, senão a fase atual.
  */
 @Component({
   selector: 'app-sala-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Lobby, ReadyCheck, GameHost],
+  imports: [Lobby, ReadyCheck, GameHost, Results],
   template: `
-    @switch (phase()) {
-      @case ('starting') {
-        <app-ready-check />
-      }
-      @case ('playing') {
-        <app-game-host />
-      }
-      @default {
-        <app-lobby />
+    @if (store.results()) {
+      <app-results />
+    } @else {
+      @switch (store.phase()) {
+        @case ('starting') { <app-ready-check /> }
+        @case ('playing') { <app-game-host /> }
+        @default { <app-lobby /> }
       }
     }
   `,
 })
 export class SalaPage {
-  private readonly store = inject(RoomStore);
+  protected readonly store = inject(RoomStore);
   private readonly router = inject(Router);
-  protected readonly phase = this.store.phase;
 
   constructor() {
     effect(() => {

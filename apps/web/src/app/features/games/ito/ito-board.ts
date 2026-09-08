@@ -1,324 +1,140 @@
-import { ChangeDetectionStrategy, Component, Input, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { RoomStore } from '../../../core/colyseus/room.store';
 import { Button, Card, Screen } from '../../../shared/ui';
-import type { ItoStateForPlayer } from '@central-de-jogos/game-ito';
+import type { ItoStateForPlayer } from './ito.types';
 
+/**
+ * Fase `organizing`: ordenar as cartas do menor pro maior, só pelas dicas.
+ * `consensus` = um quadro pra todos; `individual` = o palpite privado de cada um.
+ */
 @Component({
   selector: 'app-ito-board',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, Card, Screen, Button],
+  imports: [Button, Card, Screen],
   template: `
     <cj-screen>
-      <cj-card class="header">
-        <p class="title">🎲 Reorganize as Posições</p>
-        <p class="subtitle">Rodada {{ state.round }} - Reorganize com base nas dicas</p>
-        <p class="mode-badge">{{ state.mode === 'consensus' ? '👥 Modo Consenso' : '🎯 Modo Individual' }}</p>
-      </cj-card>
-
-      <cj-card class="board-section">
-        <p class="board-label">Ordem Atual:</p>
-        <div class="board-container">
-          <div
-            *ngFor="let playerId of board(); let i = index"
-            class="board-slot"
-            (click)="onSelectSlot(i)"
-            [class.selected]="selectedSlot() === i"
-          >
-            <div class="slot-number">{{ i + 1 }}</div>
-            <div class="slot-player">{{ playerName(playerId) }}</div>
-            <div class="slot-clue">{{ getClue(playerId) }}</div>
-          </div>
-        </div>
-      </cj-card>
-
-      <cj-card class="controls">
-        <p class="label">Mover Jogador:</p>
-        <div class="button-group">
-          <cj-button [disabled]="!canMoveUp()" (click)="moveUp()">
-            ↑ Mover para Cima
-          </cj-button>
-          <cj-button [disabled]="!canMoveDown()" (click)="moveDown()">
-            ↓ Mover para Baixo
-          </cj-button>
-        </div>
-        <p class="help-text" *ngIf="selectedSlot() !== null">
-          Clique no jogador para selecioná-lo, depois use os botões para reordenar
+      <header>
+        <p class="tag">
+          ITO · organizar ·
+          {{ state().mode === 'consensus' ? 'quadro do grupo' : 'seu palpite' }}
         </p>
+        <h1>Do menor pro maior</h1>
+        <p class="hint">Toque num nome, depois ↑ / ↓. Só as dicas — nada de dizer números.</p>
+      </header>
+
+      <cj-card class="board">
+        @for (id of order(); track id; let i = $index) {
+          <button
+            type="button"
+            class="slot"
+            [class.sel]="selected() === i"
+            [class.self]="id === me()"
+            (click)="select(i)"
+          >
+            <span class="pos">{{ i + 1 }}</span>
+            <span class="who">
+              <span class="nm">{{ name(id) }}</span>
+              <span class="clue">"{{ clue(id) }}"</span>
+            </span>
+          </button>
+        }
       </cj-card>
 
-      <cj-card class="ready-check">
-        <p class="label">Prontos para Revelar:</p>
-        <div class="ready-list">
-          <span *ngFor="let playerId of state.readyToReveal" class="ready-badge">
-            ✓ {{ playerName(playerId) }}
-          </span>
-          <span *ngIf="!isReady()" class="not-ready">
-            Você ainda não confirmou
-          </span>
-        </div>
+      <div class="moves">
+        <cj-button variant="ghost" [disabled]="!canMove(-1)" (click)="move(-1)">↑ subir</cj-button>
+        <cj-button variant="ghost" [disabled]="!canMove(1)" (click)="move(1)">↓ descer</cj-button>
+      </div>
+
+      <cj-card class="ready">
+        <p class="rc">{{ state().readyToReveal.length }} de {{ order().length }} prontos pra revelar</p>
         <cj-button
-          [class.ready]="isReady()"
+          [block]="true"
+          [variant]="iAmReady() ? 'ghost' : 'primary'"
           (click)="toggleReady()"
         >
-          {{ isReady() ? '✓ Pronto para Revelar' : 'Confirmar Pronto' }}
+          {{ iAmReady() ? 'Ainda não…' : 'Pronto pra revelar' }}
         </cj-button>
       </cj-card>
-
-      <div class="players-reference">
-        <cj-card *ngFor="let playerId of playerIds" [class.me]="isMe(playerId)">
-          <p class="player-name">{{ playerName(playerId) }}</p>
-          <p class="clue">"{{ getClue(playerId) }}"</p>
-        </cj-card>
-      </div>
     </cj-screen>
   `,
   styles: `
-    .header {
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, var(--cj-secondary) 0%, var(--cj-secondary-light) 100%);
-      color: white;
+    header { text-align: center; }
+    .tag {
+      text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.64rem;
+      color: var(--cj-game-accent); margin: 0 0 0.4rem;
     }
-
-    .title {
-      font-family: var(--cj-font-display);
-      font-size: 1.5rem;
-      margin: 0 0 0.5rem;
-      color: white;
+    h1 { font-size: 1.4rem; font-weight: 600; margin: 0; }
+    .hint { font-size: 0.8rem; color: var(--cj-muted); margin: 0.4rem 0 0; }
+    .board { display: flex; flex-direction: column; gap: 0.4rem; }
+    .slot {
+      display: flex; align-items: center; gap: 0.7rem; width: 100%;
+      padding: 0.6rem 0.7rem; border-radius: 0.7rem; text-align: left;
+      background: hsl(160 12% 13% / 0.55); border: 1px solid var(--cj-border);
+      color: var(--cj-fg); font: inherit; cursor: pointer;
+      transition: border-color var(--cj-dur), background var(--cj-dur);
     }
-
-    .subtitle {
-      margin: 0.25rem 0;
-      opacity: 0.9;
+    .slot.sel { border-color: var(--cj-game-accent); background: color-mix(in srgb, var(--cj-game-accent) 12%, transparent); }
+    .slot.self .nm::after { content: ' (você)'; color: var(--cj-muted); font-weight: 400; }
+    .pos {
+      font-family: var(--cj-font-display); font-weight: 700; font-size: 1.1rem;
+      color: var(--cj-muted); width: 1.5rem; flex-shrink: 0; text-align: center;
     }
-
-    .mode-badge {
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-      padding: 0.25rem 0.75rem;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 99px;
-      display: inline-block;
-      opacity: 0.95;
-    }
-
-    .board-section {
-      margin-bottom: 1rem;
-    }
-
-    .board-label {
-      font-weight: 600;
-      margin: 0 0 0.75rem;
-      text-transform: uppercase;
-      color: var(--cj-muted);
-      font-size: 0.85rem;
-    }
-
-    .board-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .board-slot {
-      display: grid;
-      grid-template-columns: 40px 1fr auto;
-      gap: 1rem;
-      padding: 0.75rem;
-      background: var(--cj-bg-secondary);
-      border: 2px solid var(--cj-border);
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      align-items: center;
-
-      &:hover {
-        background: var(--cj-bg-tertiary);
-        border-color: var(--cj-secondary);
-      }
-
-      &.selected {
-        background: var(--cj-secondary-light);
-        border-color: var(--cj-secondary);
-        border-width: 3px;
-      }
-    }
-
-    .slot-number {
-      font-weight: 700;
-      color: var(--cj-secondary);
-      text-align: center;
-    }
-
-    .slot-player {
-      font-weight: 600;
-    }
-
-    .slot-clue {
-      font-size: 0.8rem;
-      color: var(--cj-muted);
-      font-style: italic;
-    }
-
-    .controls {
-      margin-bottom: 1rem;
-    }
-
-    .label {
-      font-weight: 600;
-      margin: 0 0 0.75rem;
-      text-transform: uppercase;
-      color: var(--cj-muted);
-      font-size: 0.85rem;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    cj-button {
-      flex: 1;
-    }
-
-    .help-text {
-      font-size: 0.75rem;
-      color: var(--cj-muted);
-      margin: 0;
-      font-style: italic;
-    }
-
-    .ready-check {
-      margin-bottom: 1rem;
-    }
-
-    .ready-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .ready-badge {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.75rem;
-      background: var(--cj-secondary);
-      color: white;
-      border-radius: 99px;
-    }
-
-    .not-ready {
-      font-size: 0.8rem;
-      color: var(--cj-muted);
-      padding: 0.25rem 0.75rem;
-    }
-
-    cj-button.ready {
-      background: var(--cj-secondary);
-      color: white;
-    }
-
-    .players-reference {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-
-    .players-reference cj-card {
-      &.me {
-        border-color: var(--cj-accent);
-        border-width: 2px;
-      }
-    }
-
-    .player-name {
-      font-weight: 600;
-      margin: 0 0 0.5rem;
-      font-size: 0.9rem;
-    }
-
-    .clue {
-      font-size: 0.75rem;
-      font-style: italic;
-      color: var(--cj-secondary);
-      margin: 0;
-      word-break: break-word;
-    }
+    .who { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+    .nm { font-weight: 500; }
+    .clue { font-size: 0.78rem; color: var(--cj-muted); font-style: italic; word-break: break-word; }
+    .moves { display: flex; gap: 0.5rem; }
+    .moves cj-button { flex: 1; }
+    .ready { display: flex; flex-direction: column; gap: 0.6rem; text-align: center; }
+    .rc { margin: 0; font-size: 0.85rem; color: var(--cj-muted); }
   `,
 })
 export class ItoBoard {
-  @Input() state!: ItoStateForPlayer;
+  readonly state = input.required<ItoStateForPlayer>();
 
   private readonly store = inject(RoomStore);
 
-  protected currentBoard = signal<string[]>(this.state.board);
-  protected selectedSlot = signal<number | null>(null);
+  /** Cópia de trabalho da ordem: reseta quando o servidor manda um quadro novo. */
+  protected readonly order = linkedSignal(() => this.state().board);
+  protected readonly selected = signal<number | null>(null);
 
-  protected board = computed(() => this.currentBoard());
+  protected readonly me = computed(() => this.store.mySessionId());
+  protected readonly iAmReady = computed(() => this.state().readyToReveal.includes(this.me()));
 
-  protected get playerIds(): string[] {
-    return Object.keys(this.state.cards);
+  protected name(id: string): string {
+    return this.store.players().find((p) => p.id === id)?.nickname ?? 'Jogador';
+  }
+  protected clue(id: string): string {
+    return this.state().cards[id]?.clue ?? '…';
   }
 
-  protected isMe = (playerId: string): boolean => playerId === this.store.mySessionId();
-
-  protected playerName = (playerId: string): string => {
-    const player = this.store.players().find((p) => p.id === playerId);
-    return player?.nickname ?? 'Desconectado';
-  };
-
-  protected getClue = (playerId: string): string => {
-    return this.state.cards[playerId]?.clue ?? '';
-  };
-
-  protected isReady = (): boolean => {
-    return this.state.readyToReveal.includes(this.store.mySessionId());
-  };
-
-  protected onSelectSlot(index: number): void {
-    this.selectedSlot.set(this.selectedSlot() === index ? null : index);
+  protected select(i: number): void {
+    this.selected.set(this.selected() === i ? null : i);
   }
 
-  protected canMoveUp = (): boolean => {
-    const idx = this.selectedSlot();
-    return idx !== null && idx > 0;
-  };
-
-  protected canMoveDown = (): boolean => {
-    const idx = this.selectedSlot();
-    return idx !== null && idx < this.currentBoard().length - 1;
-  };
-
-  protected moveUp(): void {
-    const idx = this.selectedSlot();
-    if (idx === null || idx === 0) return;
-
-    const newBoard = [...this.currentBoard()];
-    [newBoard[idx], newBoard[idx - 1]] = [newBoard[idx - 1], newBoard[idx]];
-    this.currentBoard.set(newBoard);
-    this.selectedSlot.set(idx - 1);
-    this.sendBoard();
+  protected canMove(dir: -1 | 1): boolean {
+    const i = this.selected();
+    return i !== null && i + dir >= 0 && i + dir < this.order().length;
   }
 
-  protected moveDown(): void {
-    const idx = this.selectedSlot();
-    if (idx === null || idx === this.currentBoard().length - 1) return;
-
-    const newBoard = [...this.currentBoard()];
-    [newBoard[idx], newBoard[idx + 1]] = [newBoard[idx + 1], newBoard[idx]];
-    this.currentBoard.set(newBoard);
-    this.selectedSlot.set(idx + 1);
-    this.sendBoard();
+  protected move(dir: -1 | 1): void {
+    const i = this.selected();
+    if (i === null || !this.canMove(dir)) return;
+    const next = [...this.order()];
+    [next[i], next[i + dir]] = [next[i + dir], next[i]];
+    this.order.set(next);
+    this.selected.set(i + dir);
+    this.store.sendAction({ type: 'reorder_board', order: next });
   }
 
   protected toggleReady(): void {
     this.store.sendAction({ type: 'ready_to_reveal' });
-  }
-
-  private sendBoard(): void {
-    this.store.sendAction({ type: 'reorder_board', order: this.currentBoard() });
   }
 }

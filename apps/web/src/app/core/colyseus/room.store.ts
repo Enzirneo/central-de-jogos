@@ -68,6 +68,11 @@ export class RoomStore {
     this.error.set(null);
   }
 
+  /** Fecha a tela de resultados e volta pro lobby. */
+  dismissResults(): void {
+    this.results.set(null);
+  }
+
   leave(): void {
     this.handle?.leave();
     this.reset();
@@ -105,6 +110,10 @@ export class RoomStore {
       this.players.set(s.players);
       if (s.phase !== 'playing') {
         this.gameState.set(null);
+      }
+      // um jogo novo começou → some com o resultado do anterior
+      if (s.phase === 'starting' || s.phase === 'playing') {
+        this.results.set(null);
       }
     });
 
