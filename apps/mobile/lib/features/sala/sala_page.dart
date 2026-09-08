@@ -3,15 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/colyseus/room_controller.dart';
+import '../../core/games/game_registry.dart';
 import '../../core/models/wire.dart';
 import '../../core/theme/tokens.dart';
 import '../../shared/widgets/cj_screen.dart';
 import '../lobby/lobby_page.dart';
 import '../ready_check/ready_check_page.dart';
+import '../results/results_page.dart';
 
-/// Container da sala. Uma rota (`/sala`) — a tela segue `room.phase`.
-/// Espelha `features/sala/sala-page` da web. (A tela de jogo entra em
-/// `feat/mobile-game-host`.)
+/// Container da sala. Uma rota (`/sala`) — resultado de jogo tem prioridade,
+/// senão a tela segue `room.phase`. Espelha `features/sala/sala-page` da web.
 class SalaPage extends ConsumerWidget {
   const SalaPage({super.key});
 
@@ -26,11 +27,16 @@ class SalaPage extends ConsumerWidget {
       },
     );
 
-    final body = switch (room.phase) {
-      RoomPhase.starting => const ReadyCheckPage(),
-      RoomPhase.playing => const _PlayingPlaceholder(),
-      RoomPhase.lobby => const LobbyPage(),
-    };
+    final Widget body;
+    if (room.results != null) {
+      body = const ResultsPage();
+    } else {
+      body = switch (room.phase) {
+        RoomPhase.starting => const ReadyCheckPage(),
+        RoomPhase.playing => _GameHost(gameId: room.activeGameId),
+        RoomPhase.lobby => const LobbyPage(),
+      };
+    }
 
     return Stack(
       children: [
@@ -60,23 +66,19 @@ class SalaPage extends ConsumerWidget {
   }
 }
 
-class _PlayingPlaceholder extends StatelessWidget {
-  const _PlayingPlaceholder();
+/// Carrega a tela do jogo ativo pelo `game_registry`.
+class _GameHost extends StatelessWidget {
+  const _GameHost({required this.gameId});
+  final String gameId;
 
   @override
   Widget build(BuildContext context) {
+    final builder = gameScreenFor(gameId);
+    if (builder != null) return builder(context);
     return CjScreen(
       center: true,
-      child: Column(
-        children: [
-          const Text('🎮', style: TextStyle(fontSize: 48)),
-          const SizedBox(height: 8),
-          Text('Jogo em andamento',
-              style: Theme.of(context).textTheme.headlineSmall),
-          Text('as telas de jogo vêm na próxima branch',
-              style: TextStyle(color: CjTokens.muted)),
-        ],
-      ),
+      child: Text('Jogo "$gameId" ainda não tem tela no app.',
+          textAlign: TextAlign.center),
     );
   }
 }
