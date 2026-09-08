@@ -1,31 +1,86 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { JsonPipe } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  ViewChild,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  signal,
+  type Type,
+} from '@angular/core';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { findCatalogEntry } from '@central-de-jogos/protocol';
 import { RoomStore } from '../../core/colyseus/room.store';
-import { Card, Screen } from '../../shared/ui';
+import { loadGameComponent } from '../../core/colyseus/game-registry';
+import { Card, Screen, burstConfetti } from '../../shared/ui';
 
 /**
- * Placeholder. A branch feat/web-game-host troca isto por um container que
- * carrega o componente do jogo ativo por um registry (espelhando o
- * registry.ts do servidor).
+ * Container que carrega o componente do jogo ativo por id via registry.
+ * Mostra o jogo enquanto `phase === playing`; ao terminar, exibe a tela de
+ * resultados com confetti.
  */
 @Component({
   selector: 'app-game-host',
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Card, Screen, JsonPipe],
+  imports: [CommonModule, Card, Screen, NgComponentOutlet],
   template: `
-    <cj-screen>
-      <cj-card>
-        <p class="hd">{{ game()?.icon }} {{ game()?.displayName }} em andamento</p>
-        <pre>{{ store.gameState() | json }}</pre>
-      </cj-card>
-    </cj-screen>
+    <ng-container [ngSwitch]="showingResults()">
+      <div *ngSwitchCase="false" class="game-container">
+        <ng-container *ngComponentOutlet="gameComponent()" />
+      </div>
+
+      <div *ngSwitchCase="true" class="results-screen">
+        <canvas #confettiCanvas class="confetti"></canvas>
+        <cj-screen>
+          <cj-card class="results-card">
+            <p class="emoji">🏆</p>
+            <p class="title">Jogo Encerrado!</p>
+            <pre>{{ store.results() | json }}</pre>
+          </cj-card>
+        </cj-screen>
+      </div>
+    </ng-container>
   `,
   styles: `
-    .hd {
-      font-family: var(--cj-font-display);
-      margin: 0 0 0.75rem;
+    .game-container {
+      width: 100%;
+      height: 100vh;
     }
+
+    .results-screen {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .results-card {
+      text-align: center;
+    }
+
+    .emoji {
+      font-size: 3rem;
+      margin: 0 0 1rem;
+    }
+
+    .title {
+      font-family: var(--cj-font-display);
+      font-size: 1.5rem;
+      margin: 0 0 1rem;
+    }
+
     pre {
       font-size: 0.75rem;
       color: var(--cj-muted);
@@ -37,5 +92,48 @@ import { Card, Screen } from '../../shared/ui';
 })
 export class GameHost {
   protected readonly store = inject(RoomStore);
-  protected readonly game = () => findCatalogEntry(this.store.activeGameId());
+
+  @ViewChild('confettiCanvas', { read: ElementRef }) confettiCanvas?: ElementRef<HTMLCanvasElement>;
+
+  readonly gameComponent = signal<Type<unknown> | null>(null);
+
+  protected game = computed(() => findCatalogEntry(this.store.activeGameId()));
+  protected showingResults = computed(() => this.store.results() !== null);
+
+  constructor() {
+    // Carrega componente quando o jogo ativo muda; reseta quando fica vazio
+    effect(() => {
+      const gameId = this.store.activeGameId();
+      if (gameId) {
+        if (!this.gameComponent()) {
+          this.loadAndSetGameComponent(gameId);
+        }
+      } else {
+        this.gameComponent.set(null);
+      }
+    });
+
+    // Dispara confetti quando os resultados chegam
+    effect(() => {
+      if (this.showingResults() && this.confettiCanvas?.nativeElement) {
+        afterNextRender(() => {
+          const canvas = this.confettiCanvas?.nativeElement;
+          if (canvas) {
+            burstConfetti(canvas);
+          }
+        });
+      }
+    });
+  }
+
+  private async loadAndSetGameComponent(gameId: string): Promise<void> {
+    try {
+      const component = await loadGameComponent(gameId);
+      if (component) {
+        this.gameComponent.set(component);
+      }
+    } catch (err) {
+      console.error(`Falha ao carregar componente de jogo ${gameId}:`, err);
+    }
+  }
 }
