@@ -1,0 +1,962 @@
+<title>Migração Angular + Flutter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef0f4;
+    --ink: #1a1d24;
+    --muted: #5b6273;
+    --line: #e0e3ea;
+    --line-strong: #cdd2dc;
+    --accent: #3a55c6;
+    --accent-soft: #e7ebf9;
+    --stays: #1f8f52;
+    --goes: #c33350;
+    --enters: #b3801f;
+    --stays-soft: #e4f2ea;
+    --goes-soft: #f8e6ea;
+    --enters-soft: #f6ecd9;
+    --shadow: 0 1px 2px rgba(20, 24, 34, .04), 0 8px 24px -12px rgba(20, 24, 34, .12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131519;
+      --surface: #1b1e24;
+      --surface-2: #23272f;
+      --ink: #e7e9ee;
+      --muted: #9aa2b2;
+      --line: #2c313b;
+      --line-strong: #3a404c;
+      --accent: #8a9ff0;
+      --accent-soft: #232a41;
+      --stays: #57c98a;
+      --goes: #ec7d95;
+      --enters: #d6a951;
+      --stays-soft: #1a2a22;
+      --goes-soft: #2c1e23;
+      --enters-soft: #2b2519;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 30px -14px rgba(0, 0, 0, .6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131519;
+    --surface: #1b1e24;
+    --surface-2: #23272f;
+    --ink: #e7e9ee;
+    --muted: #9aa2b2;
+    --line: #2c313b;
+    --line-strong: #3a404c;
+    --accent: #8a9ff0;
+    --accent-soft: #232a41;
+    --stays: #57c98a;
+    --goes: #ec7d95;
+    --enters: #d6a951;
+    --stays-soft: #1a2a22;
+    --goes-soft: #2c1e23;
+    --enters-soft: #2b2519;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 30px -14px rgba(0, 0, 0, .6);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 56px);
+  }
+
+  /* ---------- header ---------- */
+  header.masthead {
+    border-bottom: 1px solid var(--line);
+    padding: clamp(40px, 7vw, 76px) 0 34px;
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: "Archivo", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+    line-height: 1.04;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+  .lede {
+    font-size: clamp(1.02rem, 2.1vw, 1.18rem);
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .status-strip {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    align-items: center;
+  }
+  .pill {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: .04em;
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    color: var(--muted);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+  .pill.live {
+    border-color: color-mix(in srgb, var(--enters) 55%, var(--line-strong));
+    color: var(--enters);
+    background: var(--enters-soft);
+  }
+  .pill strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- layout ---------- */
+  .shell {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 64px);
+    padding: 44px 0 90px;
+    align-items: start;
+  }
+  nav.toc {
+    position: sticky;
+    top: 22px;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  nav.toc p {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  nav.toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    counter-reset: toc -1;
+  }
+  nav.toc a {
+    counter-increment: toc;
+    display: flex;
+    gap: 9px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    color: var(--muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+  }
+  nav.toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--line-strong);
+    padding-top: 2px;
+  }
+  nav.toc a:hover { color: var(--ink); background: var(--surface-2); }
+  nav.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  main { min-width: 0; }
+
+  /* ---------- sections ---------- */
+  section {
+    padding-top: 30px;
+    margin-top: 30px;
+    border-top: 1px solid var(--line);
+  }
+  section:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+  .sec-num {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: .1em;
+  }
+  h2 {
+    font-family: "Archivo", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    letter-spacing: -.015em;
+    line-height: 1.12;
+    text-wrap: balance;
+    margin: 6px 0 18px;
+  }
+  h3 {
+    font-family: "Archivo", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 1.12rem;
+    letter-spacing: -.01em;
+    margin: 32px 0 12px;
+  }
+  h4 {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: .95rem;
+    margin: 22px 0 8px;
+  }
+  p { margin: 0 0 15px; max-width: 68ch; }
+  main a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  strong { font-weight: 600; }
+  ul, ol.body-list { max-width: 68ch; padding-left: 22px; margin: 0 0 15px; }
+  li { margin: 5px 0; }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: .86em;
+    background: var(--surface-2);
+    padding: .12em .4em;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+  }
+
+  .callout {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* ---------- tables ---------- */
+  .table-scroll { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+  }
+  tr:last-child td { border-bottom: 0; }
+  td code { background: transparent; border: 0; padding: 0; color: var(--ink); }
+  .cat { font-weight: 600; white-space: nowrap; }
+  .cat.stays { color: var(--stays); }
+  .cat.goes { color: var(--goes); }
+  .cat.enters { color: var(--enters); }
+  tr.row-stays { background: color-mix(in srgb, var(--stays-soft) 45%, transparent); }
+  tr.row-goes { background: color-mix(in srgb, var(--goes-soft) 45%, transparent); }
+  tr.row-enters { background: color-mix(in srgb, var(--enters-soft) 45%, transparent); }
+
+  /* ---------- diagram ---------- */
+  figure.diagram {
+    margin: 22px 0;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .node {
+    border: 1px solid var(--line-strong);
+    border-radius: 9px;
+    background: var(--surface-2);
+    padding: 12px 16px;
+    text-align: center;
+    max-width: 340px;
+  }
+  .node .n-title { font-family: "Archivo", sans-serif; font-weight: 600; font-size: .95rem; }
+  .node .n-sub { font-size: 12px; color: var(--muted); font-family: "IBM Plex Mono", monospace; }
+  .node.truth { border-color: var(--enters); background: var(--enters-soft); }
+  .node.server-tier { border-color: var(--accent); }
+  .connector { width: 1px; height: 26px; background: var(--line-strong); }
+  .connector.label { position: relative; height: 34px; }
+  .connector.label span {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); white-space: nowrap;
+  }
+  .tier { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  figcaption { margin-top: 14px; font-size: 12.5px; color: var(--muted); text-align: center; max-width: 52ch; }
+
+  /* ---------- roadmap timeline ---------- */
+  .phase {
+    position: relative;
+    padding: 4px 0 22px 30px;
+    border-left: 2px solid var(--line);
+    margin-left: 6px;
+  }
+  .phase:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .phase::before {
+    content: "";
+    position: absolute; left: -8px; top: 6px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--accent);
+  }
+  .phase .ph-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+  }
+  .phase h3 { margin: 3px 0 8px; }
+  .phase ol { margin: 0; padding-left: 20px; font-size: 14.5px; }
+  .branch {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: .82em;
+    color: var(--enters);
+  }
+
+  /* ---------- progress ---------- */
+  .progress {
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .progress li {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 12px 15px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+    font-size: 14.5px;
+  }
+  .progress li .box {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--line-strong);
+    flex-shrink: 0;
+  }
+
+  footer.foot {
+    border-top: 1px solid var(--line);
+    padding: 26px 0 60px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    nav.toc { position: static; border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--surface); }
+    nav.toc ol { display: grid; grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Central de Jogos · Plano técnico</p>
+    <h1>Migração para Angular&nbsp;+&nbsp;Flutter</h1>
+    <p class="lede">Trocar os clientes por Angular (web) e Flutter (mobile) para treinar as duas
+      tecnologias. O produto — plataforma multiplayer estilo Jackbox, salas, jogos plugáveis —
+      não muda. O servidor Node&nbsp;+&nbsp;Colyseus permanece a fonte da verdade.</p>
+    <div class="status-strip">
+      <span class="pill live">● Planejamento — <strong>nada executado</strong></span>
+      <span class="pill">Decisões de stack <strong>fechadas</strong></span>
+      <span class="pill">Espelha <strong>docs/PLANO_MIGRACAO_ANGULAR_FLUTTER.md</strong></span>
+      <span class="pill">Roadmap: <strong>6 fases</strong></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="shell">
+    <nav class="toc" aria-label="Índice">
+      <p>Seções</p>
+      <ol>
+        <li><a href="#s0">Decisões travadas</a></li>
+        <li><a href="#s1">Decisão de arquitetura</a></li>
+        <li><a href="#s2">Protocolo de comunicação</a></li>
+        <li><a href="#s3">Estrutura do monorepo</a></li>
+        <li><a href="#s4">Angular — estrutura</a></li>
+        <li><a href="#s5">Flutter — estrutura</a></li>
+        <li><a href="#s6">Mudanças no servidor</a></li>
+        <li><a href="#s7">Ajustes em .claude</a></li>
+        <li><a href="#s8">Reescrita do CLAUDE.md</a></li>
+        <li><a href="#s9">Roadmap de execução</a></li>
+        <li><a href="#s10">Build e deploy</a></li>
+        <li><a href="#s11">Riscos e decisões</a></li>
+        <li><a href="#s12">Progresso</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="s0">
+        <span class="sec-num">00</span>
+        <h2>Decisões travadas</h2>
+        <p>Fechadas com o usuário na fase de planejamento. Todas as seções abaixo já
+          refletem estas escolhas.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#</th><th>Assunto</th><th>Decisão</th></tr></thead>
+            <tbody>
+              <tr class="row-enters"><td>1</td><td>Protocolo cliente↔servidor</td><td><strong>JSON puro.</strong> Sem <code>@colyseus/schema</code> entre servidor e clientes (§2.1).</td></tr>
+              <tr class="row-enters"><td>2</td><td>Runner de teste do Angular</td><td><strong>Vitest.</strong></td></tr>
+              <tr class="row-enters"><td>3</td><td>Estado no Flutter</td><td><strong>Riverpod.</strong></td></tr>
+              <tr class="row-enters"><td>4</td><td>iOS</td><td><strong>Fora de escopo por enquanto.</strong> Sem Codemagic, sem runner macOS, sem custo. Desenvolvimento e testes só em Android. O código Flutter segue compatível com iOS; só o publicar fica adiado.</td></tr>
+              <tr class="row-enters"><td>5</td><td>Contrato TS↔Dart</td><td><strong>À mão.</strong> <code>docs/contrato-wire.md</code> como fonte + modelos escritos nos dois lados. Sem codegen.</td></tr>
+              <tr class="row-enters"><td>6</td><td>SSR / página pública (Angular)</td><td><strong>Não.</strong> App puro.</td></tr>
+              <tr class="row-enters"><td>7</td><td>Versão do contrato</td><td><strong>Regra:</strong> toda mudança no contrato mexe em servidor + Angular + Flutter na mesma branch/PR, commit <code>feat(protocol)!:</code> / <code>BREAKING CHANGE:</code>.</td></tr>
+              <tr class="row-enters"><td>8</td><td>Autenticação</td><td><strong>Adiada.</strong> MVP: entrar com apelido, jogar, sair. <code>accountId</code> em <code>PlayerState</code> fica reservado.</td></tr>
+              <tr class="row-enters"><td>9</td><td>Código gerado do Flutter</td><td><strong>Versionar</strong> (<code>*.g.dart</code>, <code>*.freezed.dart</code> vão pro Git).</td></tr>
+              <tr class="row-enters"><td>10</td><td>Nome das pastas</td><td><strong><code>apps/web</code> + <code>apps/mobile</code>.</strong> <code>apps/mobile-web</code> some.</td></tr>
+              <tr class="row-enters"><td>11</td><td>CI</td><td><strong>Adicionar</strong> workflow GitHub Actions: <code>npm test</code> + <code>npm run lint</code> + <code>flutter test</code> a cada push/PR (Fase 0).</td></tr>
+              <tr class="row-enters"><td>12</td><td>Build Android automatizado</td><td><strong>Não agora.</strong> <code>flutter build apk</code> local sob demanda.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <span class="tag">Ainda em aberto (não bloqueiam começar — ver §11)</span>
+          <p><strong>Hospedagem do servidor</strong> — decidir na Fase 4 (Fly.io / Render / VPS;
+            Railway é pago). O <code>Dockerfile</code> não muda, então dá pra escolher depois.
+            Web já é Vercel (grátis).</p>
+          <p><strong>Identidade visual</strong> — o usuário fornece uma referência no início da
+            Fase 2; o design system (tokens + componentes-base) é montado no scaffold de cada
+            cliente.</p>
+        </div>
+      </section>
+
+      <section id="s1">
+        <span class="sec-num">01</span>
+        <h2>Decisão de arquitetura</h2>
+
+        <h3>1.1 · O que fica</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Peça</th><th>Decisão</th><th>Motivo</th></tr></thead>
+            <tbody>
+              <tr class="row-stays">
+                <td><strong>Servidor</strong> <code>apps/server</code> — Node + Colyseus + TS</td>
+                <td class="cat stays">Fica como está</td>
+                <td>Fonte da verdade (CLAUDE.md §6). Colyseus resolve salas, matchmaking, reconexão e escala horizontal. Angular e Flutter viram só clientes de visualização.</td>
+              </tr>
+              <tr class="row-stays">
+                <td><strong>Lógica de jogo</strong> <code>packages/games/*</code> — TS, <code>node:test</code></td>
+                <td class="cat stays">Fica</td>
+                <td>O <code>GamePlugin</code> roda no servidor. Testes e hooks de TDD atuais continuam valendo sem mudança.</td>
+              </tr>
+              <tr class="row-stays">
+                <td><strong>Contrato</strong> <code>packages/shared-types</code></td>
+                <td class="cat stays">Fica, renomeado <code>packages/protocol</code></td>
+                <td>Continua sendo a fonte dos tipos no lado TS (servidor + Angular). O Flutter não importa daqui — espelha <code>docs/contrato-wire.md</code> à mão.</td>
+              </tr>
+              <tr class="row-stays">
+                <td>Redis / Postgres</td>
+                <td class="cat stays">Ficam</td>
+                <td>Estado efêmero de sala e dados persistentes.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>1.2 · O que sai</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Peça</th><th>Ação</th></tr></thead>
+            <tbody>
+              <tr class="row-goes">
+                <td><code>apps/mobile-web</code> — Expo + React Native + react-native-web</td>
+                <td><span class="cat goes">Apagar.</span> As regras do ITO já estão em <code>packages/games/ito</code>. As telas React servem só de referência visual — consultar via histórico do git antes de apagar (<code>git show HEAD:apps/mobile-web/src/games/ito/...</code>).</td>
+              </tr>
+              <tr class="row-goes">
+                <td><code>packages/ui</code> — componentes React Native</td>
+                <td><span class="cat goes">Apagar.</span> Específico de RN. Angular e Flutter terão seus próprios kits de UI.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>1.3 · O que entra</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Peça</th><th>Tecnologia</th></tr></thead>
+            <tbody>
+              <tr class="row-enters">
+                <td><code>apps/web</code></td>
+                <td><span class="cat enters">Angular</span> — standalone components, última LTS, TypeScript, SCSS. Cliente web.</td>
+              </tr>
+              <tr class="row-enters">
+                <td><code>apps/mobile</code></td>
+                <td><span class="cat enters">Flutter</span> (Dart). Cliente iOS + Android. Fora do workspace npm/Turborepo (tem <code>pubspec.yaml</code> próprio).</td>
+              </tr>
+              <tr class="row-enters">
+                <td><code>packages/protocol</code></td>
+                <td>Tipos + nomes de eventos + validadores (zod) do protocolo WebSocket, no lado TS.</td>
+              </tr>
+              <tr class="row-enters">
+                <td><code>docs/contrato-wire.md</code></td>
+                <td>Documento vivo: todo evento, direção, formato de payload. Fonte da verdade para o cliente Dart.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>1.4 · Dependências (alvo)</h3>
+        <figure class="diagram">
+          <div class="node truth server-tier">
+            <div class="n-title">apps/server (TS)</div>
+            <div class="n-sub">Colyseus + rooms · fonte da verdade</div>
+          </div>
+          <div class="connector"></div>
+          <div class="tier">
+            <div class="node"><div class="n-title">packages/protocol</div><div class="n-sub">tipos + zod</div></div>
+            <div class="node"><div class="n-title">packages/games/*</div><div class="n-sub">GamePlugin, TS</div></div>
+            <div class="node"><div class="n-title">Redis / Postgres</div><div class="n-sub">estado / persistência</div></div>
+          </div>
+          <div class="connector label"><span>WebSocket · JSON (+ schema)</span></div>
+          <div class="tier">
+            <div class="node"><div class="n-title">apps/web</div><div class="n-sub">Angular · importa protocol</div></div>
+            <div class="node"><div class="n-title">apps/mobile</div><div class="n-sub">Flutter · espelha contrato-wire.md</div></div>
+          </div>
+          <figcaption>Os dois clientes falam o mesmo protocolo com o servidor. Só o lado TS
+            importa <code>packages/protocol</code>; o Dart replica o contrato à mão.</figcaption>
+        </figure>
+      </section>
+
+      <section id="s2">
+        <span class="sec-num">02</span>
+        <h2>Protocolo de comunicação <span style="color:var(--muted);font-weight:400;font-size:.7em">(o ponto crítico)</span></h2>
+        <p>O servidor hoje manda dados pro cliente de <strong>duas formas</strong>:</p>
+        <ol class="body-list">
+          <li><strong><code>@colyseus/schema</code></strong> (binário, sincronização automática) — para o <code>LobbyState</code>: código da sala, fase, lista de jogadores, host.</li>
+          <li><strong>Mensagens JSON</strong> via <code>client.send("evento", payload)</code> — para o estado do jogo (<code>game_state</code>, <code>game_over</code>, <code>start_game_error</code>).</li>
+        </ol>
+        <p>O cliente JS/Angular decodifica schema de graça com <code>colyseus.js</code>. O cliente
+          Dart precisa de um decodificador de schema compatível.</p>
+
+        <h3>2.1 · Decisão: schema vs JSON para o lobby</h3>
+        <div class="callout">
+          <span class="tag">Decidido — protocolo 100% JSON</span>
+          <p>O servidor não expõe <code>@colyseus/schema</code> aos clientes. O <code>LobbyState</code>
+            schema vira detalhe interno (ou é removido) e o servidor faz
+            <code>broadcast("lobby_state", &lt;JSON&gt;)</code> a cada mudança relevante.</p>
+        </div>
+        <p><strong>Por quê:</strong> o schema é um formato binário que exige um decoder da mesma
+          versão nos dois lados. <code>colyseus.js</code> traz o decoder pro Angular, mas o cliente
+          Dart dependeria de um pacote comunitário que pode não acompanhar o
+          <code>@colyseus/schema</code> <strong>^3.0.0</strong>. Um protocolo 100% JSON é idêntico
+          pros dois clientes, versionável e depurável (dá pra ver as mensagens no navegador).</p>
+        <p><strong>Custo aceito:</strong> perde-se a sincronização incremental automática — o
+          servidor manda o estado inteiro do lobby a cada mudança. É barato: &lt; 12 jogadores.</p>
+        <p><strong>Transporte:</strong> dá pra usar o pacote <code>colyseus</code> do pub.dev
+          <em>só para conexão e matchmaking</em> (handshake <code>joinOrCreate</code> + reconexão),
+          consumindo apenas mensagens JSON e nunca <code>room.state</code>. Alternativa:
+          <code>web_socket_channel</code> + replicar o handshake HTTP à mão. Decidir no scaffold do
+          Flutter (Fase 3).</p>
+
+        <h3>2.2 · Eventos</h3>
+        <p>Entrada na sala: <code>client.joinOrCreate("lobby", { code?, nickname })</code> — sem
+          <code>code</code> cria sala nova; com <code>code</code> entra na existente
+          (<code>filterBy(["code"])</code>).</p>
+        <h4>Cliente → servidor</h4>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Evento</th><th>Payload</th><th>Regra</th></tr></thead>
+            <tbody>
+              <tr><td><code>select_game</code></td><td><code>{ gameId, options? }</code></td><td>Só o host. Só na fase <code>lobby</code>. Valida catálogo e nº de jogadores.</td></tr>
+              <tr><td><code>toggle_ready</code></td><td>—</td><td>Só na fase <code>starting</code>. Alterna o "pronto" do jogador.</td></tr>
+              <tr><td><code>cancel_start</code></td><td>—</td><td>Só o host. Volta pra <code>lobby</code>.</td></tr>
+              <tr><td><code>game_action</code></td><td><code>unknown</code> (cada jogo valida)</td><td>Só na fase <code>playing</code>. Roteado pra <code>plugin.applyAction</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4>Servidor → cliente</h4>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Evento</th><th>Payload</th><th>Quando</th></tr></thead>
+            <tbody>
+              <tr><td><code>lobby_state</code> <em>(se Plano C)</em></td><td>estado do lobby em JSON</td><td>A cada mudança. (Na Opção A isso é o schema.)</td></tr>
+              <tr><td><code>game_state</code></td><td><code>plugin.getStateForPlayer(state, sessionId)</code></td><td>A cada <code>game_action</code>; e ao entrar no meio de uma partida. Individual por jogador (esconde info).</td></tr>
+              <tr><td><code>game_over</code></td><td><code>plugin.getResults(state)</code></td><td>Quando <code>isGameOver</code> vira <code>true</code>. Sala volta pra <code>lobby</code>.</td></tr>
+              <tr><td><code>start_game_error</code></td><td><code>{ message }</code></td><td>Ação inválida (não é host, jogadores de menos, jogo inexistente...).</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Fases da sala:</strong> <code>lobby</code> → <code>starting</code> (host propôs,
+          aguarda todos "prontos") → <code>playing</code> → volta pra <code>lobby</code> (maratona
+          de jogos na mesma sala).</p>
+        <p><strong>Reconexão:</strong> já implementada — <code>allowReconnection(client, 60)</code>.
+          O cliente guarda o <code>reconnectionToken</code> e tenta <code>client.reconnect(token)</code> ao cair.</p>
+
+        <h3>2.3 · <code>packages/protocol</code> (lado TS)</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Arquivo</th><th>Conteúdo</th></tr></thead>
+            <tbody>
+              <tr><td><code>game-plugin.ts</code></td><td>(movido de shared-types) interface <code>GamePlugin</code></td></tr>
+              <tr><td><code>catalog.ts</code></td><td>(movido) <code>GAME_CATALOG</code></td></tr>
+              <tr><td><code>events.ts</code></td><td><strong>novo</strong>: nomes de eventos como const, tipos de payload</td></tr>
+              <tr><td><code>events.schema.ts</code></td><td><strong>novo</strong>: schemas zod para validar payloads de <em>entrada</em> no servidor</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>Nomes de evento em <code>snake_case</code> (CLAUDE.md §6): <code>export const EVENTS = { SELECT_GAME: "select_game", ... } as const</code>.</li>
+          <li>O servidor valida <strong>todo</strong> payload de entrada com zod antes de usar.</li>
+          <li>Renomear o pacote <code>@central-de-jogos/shared-types</code> → <code>@central-de-jogos/protocol</code> em todos os <code>package.json</code>, imports e tsconfig paths.</li>
+        </ul>
+      </section>
+
+      <section id="s3">
+        <span class="sec-num">03</span>
+        <h2>Estrutura alvo do monorepo</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Caminho</th><th>Nota</th></tr></thead>
+            <tbody>
+              <tr><td><code>apps/server/</code></td><td>Inalterado (Node + Colyseus).</td></tr>
+              <tr class="row-enters"><td><code>apps/web/</code></td><td>Novo — Angular.</td></tr>
+              <tr class="row-enters"><td><code>apps/mobile/</code></td><td>Novo — Flutter (fora do workspace npm).</td></tr>
+              <tr><td><code>packages/protocol/</code></td><td>ex-shared-types + eventos + zod.</td></tr>
+              <tr><td><code>packages/games/{_template,ito}/</code></td><td>Inalterado.</td></tr>
+              <tr class="row-enters"><td><code>docs/contrato-wire.md</code></td><td>Novo.</td></tr>
+              <tr><td><code>.claude/</code></td><td>rules + hooks — pequenos ajustes de texto.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><code>package.json</code> raiz: <code>workspaces</code> = <code>["apps/server", "apps/web", "packages/*", "packages/games/*"]</code> — <strong><code>apps/mobile</code> não entra</strong>.</li>
+          <li><code>turbo.json</code>: <code>web</code> ganha <code>dev/build/lint/test</code>. Flutter roda por fora; opcional <code>"mobile:test": "cd apps/mobile &amp;&amp; flutter test"</code>.</li>
+          <li><code>.gitignore</code>: adicionar <code>apps/web/dist</code>, <code>.angular/</code>, <code>apps/mobile/build/</code>, <code>apps/mobile/.dart_tool/</code>, <code>apps/mobile/ios/Pods/</code>.</li>
+        </ul>
+      </section>
+
+      <section id="s4">
+        <span class="sec-num">04</span>
+        <h2>Angular — como estruturar (<code>apps/web</code>)</h2>
+        <p>"Bem estruturado" = arquitetura por features, standalone components, separação
+          smart/dumb, estado em signals.</p>
+
+        <h3>4.1 · Setup</h3>
+        <ul>
+          <li><code>ng new web</code>: standalone (sem NgModules), <strong>SCSS</strong>, routing, <strong>sem SSR</strong> de início.</li>
+          <li>Registrar como workspace npm: scripts <code>dev</code> (<code>ng serve</code>), <code>build</code>, <code>lint</code>, <code>test</code>.</li>
+          <li><strong>Runner:</strong> Karma foi descontinuado. Usar <strong>Vitest</strong> (<code>@angular/build:unit-test</code> ou <code>@analogjs/vitest-angular</code>). Alinha com o <code>npm test</code> do monorepo.</li>
+          <li>ESLint via <code>angular-eslint</code> — ligar só em <code>apps/web</code>.</li>
+        </ul>
+
+        <h3>4.2 · Pastas</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Pasta</th><th>O que mora aqui</th></tr></thead>
+            <tbody>
+              <tr><td><code>core/colyseus/</code></td><td><code>colyseus.service.ts</code> (conexão, joinOrCreate, reconnect) · <code>room.store.ts</code> (signals: sala, jogadores, fase, host, erros)</td></tr>
+              <tr><td><code>core/config/</code></td><td><code>app-config.ts</code> — URL do servidor por ambiente</td></tr>
+              <tr><td><code>core/game-registry.ts</code></td><td>id do catálogo → <code>() =&gt; import(componente)</code></td></tr>
+              <tr><td><code>shared/ui/</code></td><td>botão, card, layout, avatar — SCSS + tokens (dumb, <code>OnPush</code>)</td></tr>
+              <tr><td><code>features/{home,lobby,ready-check,game-host}/</code></td><td>telas smart (injetam o store)</td></tr>
+              <tr><td><code>features/games/ito/</code></td><td><code>ito-clue/ ito-board/ ito-reveal/ ito-results/</code> + <code>ito.routes.ts</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>4.3 · Padrões</h3>
+        <ul>
+          <li><strong>Estado:</strong> <code>RoomStore</code> <code>providedIn: 'root'</code> expondo <code>signal</code>s. O <code>ColyseusService</code> converte eventos do socket em fluxo e atualiza os signals. Sem NgRx (overkill); trocável por SignalStore depois sem mexer nos componentes.</li>
+          <li><strong>Smart vs dumb:</strong> <code>features/</code> injetam o store; <code>shared/ui/</code> só <code>input()</code>/<code>output()</code>, <code>OnPush</code>, zero serviço.</li>
+          <li><strong>Roteamento:</strong> lazy por feature. <code>/</code> home · <code>/sala/:code</code> lobby · <code>/sala/:code/jogar</code> game-host, que faz <code>import()</code> dinâmico do jogo via <code>game-registry</code>.</li>
+          <li><strong>Contrato de jogo no cliente:</strong> <code>GameClientPlugin { id; loadComponent(); }</code> num mapa — espelha o <code>registry.ts</code> do servidor.</li>
+          <li><strong>Estilo:</strong> <code>styles/_tokens.scss</code> (cores, espaçamento, tipografia). Considerar Angular CDK sem Material.</li>
+        </ul>
+
+        <h3>4.4 · Testes</h3>
+        <ul>
+          <li>Lógica pura (mapeadores estado→view, validações de form) primeiro, com Vitest.</li>
+          <li>Componentes: <code>@testing-library/angular</code> + asserção de comportamento visível.</li>
+          <li><code>RoomStore</code>: <code>ColyseusService</code> fake (Mock Object — ver <code>.claude/rules/tdd.md</code>).</li>
+        </ul>
+      </section>
+
+      <section id="s5">
+        <span class="sec-num">05</span>
+        <h2>Flutter — como estruturar (<code>apps/mobile</code>)</h2>
+
+        <h3>5.1 · Setup</h3>
+        <ul>
+          <li><code>flutter create --org com.centraldejogos --platforms=ios,android mobile</code> dentro de <code>apps/</code>.</li>
+          <li>Dependências principais:
+            <ul>
+              <li><strong>Transporte</strong> (§2.1): pacote <code>colyseus</code> do pub.dev só para conexão/matchmaking/reconexão, consumindo JSON e nunca <code>room.state</code>; ou <code>web_socket_channel</code> + handshake HTTP à mão. Decidir no scaffold.</li>
+              <li><strong><code>flutter_riverpod</code></strong> — estado (testável, sem boilerplate; bom pra treino). Alternativa: <code>flutter_bloc</code>.</li>
+              <li><strong><code>go_router</code></strong> — navegação declarativa.</li>
+              <li><strong><code>freezed</code> + <code>json_serializable</code> + <code>build_runner</code></strong> — modelos imutáveis do protocolo.</li>
+            </ul>
+          </li>
+          <li>Lints: <code>flutter_lints</code> — considerar <code>very_good_analysis</code>.</li>
+        </ul>
+
+        <h3>5.2 · Pastas</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Pasta</th><th>O que mora aqui</th></tr></thead>
+            <tbody>
+              <tr><td><code>core/colyseus/</code></td><td><code>colyseus_client.dart</code> (connect, joinOrCreate, reconnect) · <code>room_controller.dart</code> (Riverpod Notifier: estado da sala)</td></tr>
+              <tr><td><code>core/config/app_config.dart</code></td><td>URL do servidor por ambiente (<code>--dart-define</code>)</td></tr>
+              <tr><td><code>core/game_registry.dart</code></td><td>id do catálogo → <code>WidgetBuilder</code></td></tr>
+              <tr><td><code>models/</code></td><td>espelho de <code>docs/contrato-wire.md</code> (freezed): <code>lobby_state.dart</code>, <code>player.dart</code>, <code>game_results.dart</code>, <code>events.dart</code></td></tr>
+              <tr><td><code>shared/widgets/</code></td><td>botão, card, layout — widgets pequenos</td></tr>
+              <tr><td><code>features/{home,lobby,ready_check,game_host}/</code></td><td>telas</td></tr>
+              <tr><td><code>features/games/ito/</code></td><td><code>ito_clue_screen.dart</code>, <code>ito_board_screen.dart</code>, ...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>5.3 · Padrões</h3>
+        <ul>
+          <li><strong>Estado:</strong> <code>RoomController</code> (Riverpod <code>Notifier</code>) assina eventos do <code>ColyseusClient</code> e expõe um <code>RoomState</code> imutável. Widgets fazem <code>ref.watch</code>.</li>
+          <li><strong>Lógica fora da UI:</strong> nada de regra no <code>build()</code>. Mapeadores estado→viewmodel em funções puras testáveis.</li>
+          <li><strong>Widgets pequenos</strong> (clean-code §2/§9): extrair <code>Widget</code> privado em vez de método <code>_buildX()</code>.</li>
+          <li><strong>Contrato de jogo no cliente:</strong> <code>typedef GameBuilder = Widget Function(GameContext ctx)</code> num <code>Map&lt;String, GameBuilder&gt;</code>.</li>
+          <li><strong>Ambiente:</strong> <code>--dart-define=SERVER_URL=ws://10.0.2.2:2567</code> (emulador Android → host via <code>10.0.2.2</code>).</li>
+          <li><strong>Modelos:</strong> gerados de JSON com <code>freezed</code>. <code>docs/contrato-wire.md</code> é a fonte — mudança no protocolo atualiza o doc e os dois lados.</li>
+        </ul>
+
+        <h3>5.4 · Testes</h3>
+        <ul>
+          <li><code>flutter test</code>: unidade dos mapeadores puros e do <code>RoomController</code> (com <code>ColyseusClient</code> fake).</li>
+          <li>Widget tests das telas principais (lobby, ITO).</li>
+        </ul>
+      </section>
+
+      <section id="s6">
+        <span class="sec-num">06</span>
+        <h2>Mudanças no servidor (<code>apps/server</code>)</h2>
+        <p>Pequenas, mas necessárias:</p>
+        <ol class="body-list">
+          <li><strong>Renomear import</strong> <code>@central-de-jogos/shared-types</code> → <code>@central-de-jogos/protocol</code>.</li>
+          <li><strong>Validar payloads de entrada com zod</strong> (<code>select_game</code>, <code>game_action</code>, opções de join) — hoje confia no shape.</li>
+          <li><strong>CORS / origens permitidas:</strong> liberar <code>http://localhost:4200</code> (Angular dev) e o app Flutter. Adicionar <code>ALLOWED_ORIGINS</code> ao <code>.env.example</code>.</li>
+          <li><strong>Protocolo JSON</strong> (§2.1, decidido): <code>broadcast("lobby_state", toJSON(this.state))</code> nos pontos de mudança; <code>LobbyState</code> schema vira interno ou é removido.</li>
+          <li><strong><code>game_over</code> → também mandar <code>lobby_state</code></strong> atualizado (a sala volta pra <code>lobby</code>).</li>
+          <li><strong>Teste de integração de sala</strong> com <code>@colyseus/testing</code> (lobby → starting → playing → game_over).</li>
+          <li><code>.env.example</code>: revisar chaves (Postgres, Redis, PORT, ALLOWED_ORIGINS).</li>
+        </ol>
+        <div class="callout">
+          <span class="tag">Nota</span>
+          <p>Nenhuma dessas mexe em <code>packages/games/*</code> — a lógica de jogo e seus testes
+            ficam intactos. Os hooks de TDD continuam válidos sem alteração (só olham
+            <code>packages/games/*/src</code>).</p>
+        </div>
+      </section>
+
+      <section id="s7">
+        <span class="sec-num">07</span>
+        <h2>Ajustes em <code>.claude/</code> (rules e hooks)</h2>
+        <p>Só texto — o enforcement não muda de comportamento.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Arquivo</th><th>Mudança</th></tr></thead>
+            <tbody>
+              <tr><td><code>rules/clean-code.md</code></td><td>Trocar menções a React Native/Expo por Angular + Flutter. Adicionar "aplicação": Angular (standalone, smart/dumb, signals, OnPush) e Flutter (widgets pequenos, lógica fora do <code>build</code>, providers testáveis).</td></tr>
+              <tr><td><code>rules/tdd.md</code></td><td>"Aplicação neste repo": 3 runners — <code>node:test</code> (servidor/games), Vitest (<code>apps/web</code>), <code>flutter test</code> (<code>apps/mobile</code>). TDD obrigatório e com hook só em <code>packages/games/*</code>; nos clientes é recomendado, não bloqueado.</td></tr>
+              <tr><td><code>rules/gitflow.md</code></td><td>Escopos de commit: trocar <code>mobile-web</code> por <code>web</code>, adicionar <code>mobile</code> e <code>ci</code>. Checks: <code>npm run lint &amp;&amp; npm test</code> <strong>e</strong> <code>cd apps/mobile &amp;&amp; flutter analyze &amp;&amp; flutter test</code>. Agora há CI no GitHub Actions rodando isso a cada push/PR.</td></tr>
+              <tr><td><code>rules/fluxo-de-trabalho.md</code></td><td>Lista de peças: <code>apps/server</code>, <code>apps/web</code>, <code>apps/mobile</code>, <code>packages/protocol</code>, <code>packages/games/*</code>.</td></tr>
+              <tr class="row-stays"><td><code>hooks/*</code></td><td><strong>Sem mudança.</strong> <code>classify()</code> já mira só <code>packages/games/*/src</code>.</td></tr>
+              <tr class="row-stays"><td><code>settings.json</code></td><td>Sem mudança.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Opcional (decidir depois): estender <code>post-edit-verify.js</code> para rodar
+          <code>ng lint</code>/<code>flutter analyze</code> no arquivo tocado. Fora do escopo inicial.</p>
+      </section>
+
+      <section id="s8">
+        <span class="sec-num">08</span>
+        <h2>Reescrita do <code>CLAUDE.md</code></h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Seção</th><th>Mudança</th></tr></thead>
+            <tbody>
+              <tr><td>§2 Stack</td><td>Nova tabela: Web = Angular · Mobile = Flutter · Servidor = Colyseus (inalterado) · Contrato = <code>packages/protocol</code> + <code>docs/contrato-wire.md</code>.</td></tr>
+              <tr><td>§3 Estrutura</td><td>Nova árvore (§3 deste plano).</td></tr>
+              <tr><td>§4 Jogo plugável</td><td>Manter o <code>GamePlugin</code> do servidor <strong>verbatim</strong>; adicionar o contrato de jogo no cliente (registry Angular + Flutter) e o protocolo WebSocket.</td></tr>
+              <tr><td>§5 Fluxo de sala</td><td>Manter; explicitar os eventos JSON.</td></tr>
+              <tr><td>§6 Convenções</td><td>Adicionar bloco Angular e bloco Dart/Flutter; manter <code>snake_case</code> e "servidor é a fonte da verdade".</td></tr>
+              <tr><td>§7 Build/deploy</td><td>Nova tabela (§10 deste plano).</td></tr>
+              <tr><td>§8 Roadmap</td><td>Substituir pelo §9 deste plano.</td></tr>
+              <tr><td>Checklist "novo jogo"</td><td>Passa a ter 4 lugares: plugin TS + testes · catálogo · componente Angular · widget Flutter.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s9">
+        <span class="sec-num">09</span>
+        <h2>Roadmap de execução</h2>
+        <p>Cada fase é uma ou mais branches <code class="branch">tipo/descricao</code> a partir de
+          <code>dev</code>, com <code>npm test</code> + <code>npm run lint</code> verdes antes do
+          merge (<code>.claude/rules/gitflow.md</code>).</p>
+
+        <div class="phase">
+          <span class="ph-label">Fase 0</span>
+          <h3>Limpeza, contrato e CI</h3>
+          <ol>
+            <li><code class="branch">chore/remove-clientes-react</code> — apagar <code>apps/mobile-web</code> e <code>packages/ui</code>; ajustar <code>package.json</code> raiz, <code>turbo.json</code>, <code>.gitignore</code>. Servidor tem que continuar buildando e <code>npm test</code> verde.</li>
+            <li><code class="branch">refactor/renomeia-protocol</code> — <code>packages/shared-types</code> → <code>packages/protocol</code>; atualizar imports.</li>
+            <li><code class="branch">feat/protocol-eventos</code> — <code>events.ts</code> + <code>events.schema.ts</code> (zod) + testes. Servidor valida entradas.</li>
+            <li>Escrever <code>docs/contrato-wire.md</code> — Markdown: tabela por evento (nome, direção, quando dispara) + JSON de exemplo + notas de reconexão e erro.</li>
+            <li><code class="branch">ci/github-actions</code> — workflow rodando <code>npm run lint</code> + <code>npm test</code> a cada push/PR pra <code>dev</code>. (<code>flutter test</code> entra na Fase 3.)</li>
+          </ol>
+        </div>
+
+        <div class="phase">
+          <span class="ph-label">Fase 1</span>
+          <h3>Servidor pronto para dois clientes</h3>
+          <ol>
+            <li><code class="branch">feat/server-cors-json</code> — CORS/origens; protocolo JSON (§2.1): <code>broadcast("lobby_state", &lt;JSON&gt;)</code> nos pontos de mudança; <code>LobbyState</code> schema vira interno ou é removido; <code>game_over</code> passa a mandar <code>lobby_state</code> também.</li>
+            <li><code class="branch">test/server-fluxo-sala</code> — teste de integração com <code>@colyseus/testing</code>.</li>
+            <li>Fechar <code>docs/contrato-wire.md</code> com o protocolo final.</li>
+          </ol>
+        </div>
+
+        <div class="phase">
+          <span class="ph-label">Fase 2</span>
+          <h3>Web (Angular) MVP</h3>
+          <ol>
+            <li><code class="branch">feat/web-scaffold</code> — <code>ng new</code>, workspace npm, Vitest, <code>angular-eslint</code>, estrutura. <strong>Design system:</strong> o usuário fornece a referência visual e o <code>_tokens.scss</code> + componentes-base são montados aqui. Página vazia compilando + CI passando.</li>
+            <li><code class="branch">feat/web-colyseus-core</code> — <code>ColyseusService</code> + <code>RoomStore</code> (signals) + testes com fake.</li>
+            <li><code class="branch">feat/web-lobby</code> — home, lobby (host escolhe jogo), ready-check.</li>
+            <li><code class="branch">feat/web-game-host</code> — container troca componente por <code>activeGameId</code>; registry; template game ponta a ponta.</li>
+            <li><code class="branch">feat/web-ito</code> — telas do ITO (clue / board / reveal / results).</li>
+            <li><code class="branch">chore/web-deploy</code> — build estático na Vercel.</li>
+          </ol>
+        </div>
+
+        <div class="phase">
+          <span class="ph-label">Fase 3</span>
+          <h3>Mobile (Flutter) MVP</h3>
+          <ol>
+            <li><code class="branch">feat/mobile-scaffold</code> — <code>flutter create --platforms=ios,android</code>, deps, estrutura, <code>ThemeData</code> + widgets-base a partir da mesma referência visual da web, <code>flutter analyze</code>/<code>test</code> verdes. Adicionar <code>flutter test</code> ao CI. <strong>Execução e testes só em Android</strong> — iOS compatível no código, sem build.</li>
+            <li><code class="branch">feat/mobile-colyseus-core</code> — transporte (§2.1) + <code>RoomController</code> + modelos freezed + testes com fake.</li>
+            <li><code class="branch">feat/mobile-lobby</code> — home, lobby, ready-check.</li>
+            <li><code class="branch">feat/mobile-game-host</code> — registry + template game ponta a ponta.</li>
+            <li><code class="branch">feat/mobile-ito</code> — telas do ITO.</li>
+            <li>Build Android: <code>flutter build apk</code> local, sob demanda. Sem pipeline automatizado (nem Android nem iOS).</li>
+          </ol>
+        </div>
+
+        <div class="phase">
+          <span class="ph-label">Fase 4</span>
+          <h3>Paridade, escala e deploy</h3>
+          <ol>
+            <li>Revisar paridade de features entre web e mobile (lobby + template + ITO).</li>
+            <li><code class="branch">test/multi-sala</code> — várias salas simultâneas, ajustar driver Redis do Colyseus.</li>
+            <li><strong>Decidir a hospedagem do servidor</strong> (Fly.io / Render / VPS — ver §11) e subir um ambiente: servidor + Redis + Postgres gerenciados, web na Vercel.</li>
+            <li><code class="branch">docs/atualiza-claude-md</code> — reescrever <code>CLAUDE.md</code> conforme §8.</li>
+          </ol>
+        </div>
+
+        <div class="phase">
+          <span class="ph-label">Fase 5</span>
+          <h3>Novos jogos (contínuo)</h3>
+          <ol>
+            <li>Por jogo: plugin TS + testes → catálogo → componente Angular → widget Flutter. Documentar o ciclo no <code>CLAUDE.md</code>.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="s10">
+        <span class="sec-num">10</span>
+        <h2>Build e deploy (alvo)</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Peça</th><th>Local</th><th>Produção</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><code>apps/server</code></td>
+                <td><code>docker compose up</code> (server + Postgres + Redis)</td>
+                <td>Builda o <code>Dockerfile</code> (inalterado). <strong>Host a decidir na Fase 4</strong> — Fly.io / Render / VPS. Railway funciona, mas o grátis é limitado.</td>
+              </tr>
+              <tr>
+                <td><code>apps/web</code> (Angular)</td>
+                <td><code>ng serve</code> (porta 4200)</td>
+                <td><code>ng build</code> → estático → <strong>Vercel</strong> (grátis, sem Docker)</td>
+              </tr>
+              <tr>
+                <td><code>apps/mobile</code> (Flutter)</td>
+                <td><code>flutter run</code> em <strong>Android</strong> (emulador/aparelho)</td>
+                <td><code>flutter build apk</code> local, sob demanda. Publicação (Play Store / iOS) <strong>adiada</strong> — iOS exige macOS/Xcode.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><strong>Docker continua só para o servidor.</strong></li>
+          <li><strong>Nunca containerizar <code>apps/web</code> nem <code>apps/mobile</code>.</strong></li>
+          <li>Variáveis sensíveis em <code>.env</code> (nunca commitado) + <code>.env.example</code>. Cliente: URL do servidor via <code>environment.ts</code> (Angular) e <code>--dart-define</code> (Flutter).</li>
+        </ul>
+      </section>
+
+      <section id="s11">
+        <span class="sec-num">11</span>
+        <h2>O que ainda está em aberto</h2>
+        <p>As decisões de tecnologia estão fechadas (§0). Resta:</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#</th><th>Assunto</th><th>Situação</th></tr></thead>
+            <tbody>
+              <tr><td>A</td><td>Hospedagem do servidor</td><td>Decidir na <strong>Fase 4</strong>. Precisa de processo sempre ligado + Redis + Postgres. <strong>Fly.io</strong> (cota grátis, mais mão na massa) · <strong>Render</strong> (grátis hiberna após 15 min — ruim p/ tempo real; pago ~US$7) · <strong>Railway</strong> (US$5 de crédito/mês) · <strong>VPS</strong> ~US$5/mês. O <code>Dockerfile</code> não muda — escolher depois não gera retrabalho.</td></tr>
+              <tr><td>B</td><td>Identidade visual</td><td>O usuário fornece uma referência (print/site/paleta/fonte) <strong>no início da Fase 2</strong>. A partir dela: <code>_tokens.scss</code> + componentes-base no Angular, <code>ThemeData</code> + widgets-base no Flutter (mesma linguagem visual). ~meio dia por cliente.</td></tr>
+              <tr><td>C</td><td>Transporte do cliente Dart</td><td>Pacote <code>colyseus</code> (só conexão/matchmaking) vs <code>web_socket_channel</code> + handshake à mão. Decidir no scaffold do Flutter (Fase 3). Baixo risco — protocolo já é JSON.</td></tr>
+              <tr><td>D</td><td>Formato exato dos payloads</td><td>Não é decisão, é trabalho: escrever <code>docs/contrato-wire.md</code> na Fase 0 e fechar na Fase 1.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Itens historicamente "a definir" no <code>CLAUDE.md</code> que <strong>seguem em aberto e
+          não bloqueiam</strong> a migração: autenticação (§0, #8), limite de jogadores por sala,
+          existência de uma "tela mestre"/TV.</p>
+      </section>
+
+      <section id="s12">
+        <span class="sec-num">12</span>
+        <h2>Progresso</h2>
+        <ul class="progress">
+          <li><span class="box">[ ]</span> Fase 0 — Limpeza, contrato e CI</li>
+          <li><span class="box">[ ]</span> Fase 1 — Servidor pronto p/ dois clientes</li>
+          <li><span class="box">[ ]</span> Fase 2 — Web (Angular) MVP</li>
+          <li><span class="box">[ ]</span> Fase 3 — Mobile (Flutter) MVP</li>
+          <li><span class="box">[ ]</span> Fase 4 — Paridade, escala e deploy</li>
+          <li><span class="box">[ ]</span> Fase 5 — Novos jogos (contínuo)</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    Central de Jogos · plano de migração · status: planejamento · espelha docs/PLANO_MIGRACAO_ANGULAR_FLUTTER.md
+  </div>
+</footer>
