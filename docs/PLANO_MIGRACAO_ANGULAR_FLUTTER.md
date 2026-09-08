@@ -591,6 +591,19 @@ existência de uma "tela mestre"/TV.
   ponta a ponta, com reconexão. Falta só o deploy (Fase 4). **RETOMAR: Fase 3 —
   Flutter** (usuário instalando Android Studio + Flutter SDK; `flutter doctor`
   verde antes de começar).
-- [ ] Fase 3 — Mobile (Flutter) MVP
+- [~] **Fase 3 — Mobile (Flutter) MVP** — em andamento:
+  - [x] `feat/mobile-scaffold` — `apps/mobile` criado (`--platforms=android,ios
+    --empty`, fora do workspace npm). Deps: flutter_riverpod, go_router, freezed,
+    json_serializable, google_fonts. Estrutura espelha a web: `core/theme`
+    (`tokens.dart` = espelho de `_tokens.scss`), `core/router` (go_router),
+    `features/home` (placeholder), `shared/widgets/cj_screen`. CI ganhou job
+    `flutter` (analyze + test). `flutter analyze` limpo, 2 testes verdes.
+  - [ ] **`feat/mobile-colyseus-core`** ← RETOMAR AQUI. Transporte WebSocket
+    (`web_socket_channel`) + `RoomController` (Riverpod) + modelos freezed do
+    contrato (espelhar `docs/contrato-wire.md`) + testes com fake. Espelha
+    `apps/web/src/app/core/colyseus/`.
+  - [ ] `feat/mobile-lobby` — home, lobby, ready-check.
+  - [ ] `feat/mobile-game-host` — registry + Contador ponta a ponta.
+  - [ ] `feat/mobile-ito` — telas do ITO.
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
