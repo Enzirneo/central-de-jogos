@@ -564,15 +564,16 @@ existência de uma "tela mestre"/TV.
     pelo **código-fonte** (`tsconfig` paths → `packages/protocol/src/index.ts`),
     porque o dev server do Angular não lê exports nomeados do `dist` CJS. Regra
     p/ dependências futuras de `packages/*` no web: mesma coisa.
-  - [ ] **`feat/web-game-host`** ← RETOMAR AQUI. Container que troca o componente
-    do jogo por `activeGameId` via um `core/colyseus/game-registry.ts` (mapa
-    `id → () => import('../features/games/<jogo>/...')`, espelha
-    `apps/server/src/games/registry.ts`) + tela de resultados usando
-    `store.results()` e `burstConfetti`. Fazer o `_template` (Contador) rodar
-    ponta a ponta primeiro.
-  - [ ] `feat/web-ito` — telas do ITO em `features/games/ito/`. Reler
-    `packages/games/ito/src/types.ts` (`ItoStateForPlayer`, `ItoAction`,
-    `ItoPhase`) e transformar cada regra num item de checklist.
+  - [x] **`feat/web-game-host`**. Container que troca o componente do jogo por
+    `activeGameId` via `core/colyseus/game-registry.ts` (mapa `id → () =>
+    import(componente)`, espelha `apps/server/src/games/registry.ts`) +
+    `game-host.ts` carrega dinamicamente com `NgComponentOutlet` + tela de
+    resultados com `store.results()` e `burstConfetti` + componente `_template`
+    (contador) funcionando ponta a ponta (lint + testes verdes).
+  - [ ] **`feat/web-ito`** ← RETOMAR AQUI. Telas do ITO em `features/games/ito/`.
+    Reler `packages/games/ito/src/types.ts` (`ItoStateForPlayer`, `ItoAction`,
+    `ItoPhase`) e transformar cada regra num item de checklist. Registry já suporta
+    import dinâmico — só adicionar a linha comentada em `game-registry.ts`.
   - [ ] `chore/web-deploy` — Vercel (root `apps/web`, build `ng build`, output
     `apps/web/dist/web/browser`).
 - [ ] Fase 3 — Mobile (Flutter) MVP
