@@ -1,19 +1,11 @@
 import { Room, Client, matchMaker } from "@colyseus/core";
-import type { GamePlugin } from "@central-de-jogos/protocol";
+import type { GamePlugin, JoinOptions } from "@central-de-jogos/protocol";
+import { joinOptionsSchema, selectGamePayloadSchema } from "@central-de-jogos/protocol";
 import { LobbyState, PlayerState } from "./schema/LobbyState";
 import { generateRoomCode } from "../utils/roomCode";
 import { getGamePlugin } from "../games/registry";
 
-interface LobbyJoinOptions {
-  nickname?: string;
-  code?: string;
-}
-
-interface SelectGameMessage {
-  gameId?: string;
-  /** Configuração específica do jogo (ex: modo, número de rodadas) — cada jogo valida a sua. */
-  options?: unknown;
-}
+type LobbyJoinOptions = JoinOptions;
 
 const RECONNECTION_GRACE_SECONDS = 60;
 const MAX_PLAYERS = 12; // assunção do CLAUDE.md, revisar depois
@@ -42,8 +34,13 @@ export class LobbyRoom extends Room<LobbyState> {
     (this.listing as unknown as { code: string }).code = code;
     this.listing.save();
 
-    this.onMessage("select_game", (client, message: SelectGameMessage) => {
-      this.handleSelectGame(client, message?.gameId, message?.options);
+    this.onMessage("select_game", (client, message: unknown) => {
+      const parsed = selectGamePayloadSchema.safeParse(message);
+      if (!parsed.success) {
+        client.send("start_game_error", { message: "Escolha de jogo inválida." });
+        return;
+      }
+      this.handleSelectGame(client, parsed.data.gameId, parsed.data.options);
     });
 
     this.onMessage("toggle_ready", (client) => {
@@ -59,10 +56,15 @@ export class LobbyRoom extends Room<LobbyState> {
     });
   }
 
-  onJoin(client: Client, options: LobbyJoinOptions) {
+  onJoin(client: Client, rawOptions: unknown) {
+    // Lenient: opções malformadas não derrubam o jogador — só ignoramos o que
+    // não valida e o apelido cai no fallback do sanitizeNickname.
+    const parsed = joinOptionsSchema.safeParse(rawOptions);
+    const nickname = parsed.success ? parsed.data.nickname : undefined;
+
     const player = new PlayerState();
     player.id = client.sessionId;
-    player.nickname = sanitizeNickname(options?.nickname);
+    player.nickname = sanitizeNickname(nickname);
     player.connected = true;
     this.state.players.set(client.sessionId, player);
 
