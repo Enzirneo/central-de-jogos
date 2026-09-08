@@ -546,7 +546,7 @@ existência de uma "tela mestre"/TV.
   `ALLOWED_ORIGINS`; teste de integração `apps/server/src/rooms/LobbyRoom.test.ts`
   (fluxo completo + recusas). Pendência menor: teste dedicado de reconexão com
   fake timers (o `allowReconnection` de 60 s seguraria o processo).
-- [~] **Fase 2 — Web (Angular) MVP** — em andamento:
+- [~] **Fase 2 — Web (Angular) MVP** — funcional (falta só polish + deploy da Fase 4):
   - [x] Referência visual definida (base: projeto `organo`) e preview aprovado
     (`docs/preview-visual.html`).
   - [x] `feat/web-scaffold` — Angular 20 em `apps/web`, workspace npm, Vitest
@@ -570,15 +570,24 @@ existência de uma "tela mestre"/TV.
     `game-host.ts` carrega dinamicamente com `NgComponentOutlet` + tela de
     resultados com `store.results()` e `burstConfetti` + componente `_template`
     (contador) funcionando ponta a ponta (lint + testes verdes).
-  - [x] **`feat/web-ito`**. Telas do ITO em `features/games/ito/`:
-    - `ito-host.ts` — container que coordena as fases (giving_clues, organizing, revealed)
-    - `ito-clue.ts` — fase de envio de dicas com countdown de caracteres
-    - `ito-board.ts` — fase de reorganização do quadro (clique + botões ↑↓)
-    - `ito-reveal.ts` — revelação com comparação à ordem correta
-    - Suporta modos consensus (quadro compartilhado) e individual (palpites privados)
-    - Registrado no `game-registry.ts`; lint + build verdes.
-  - [ ] **`chore/web-deploy`** ← RETOMAR AQUI. Vercel (root `apps/web`, build `ng build`, output
-    `apps/web/dist/web/browser`).
+  - [x] **`feat/web-ito`** + **`fix/web-ito`**. Telas do ITO em
+    `features/games/ito/` (`ito-host`/`clue`/`board`/`reveal`), modos consensus e
+    individual. O `fix` reescreveu tudo: consertou crash do `ito-board`
+    (`linkedSignal(state.board)` em vez de field initializer lendo `@Input`),
+    trocou ~13 tokens CSS inventados pelos reais, alinhou ao estilo do app
+    (`@if`/`@for`/`input()`), tirou a dep do pacote Node (`ito.types.ts` espelha
+    o contrato), moveu a tela de resultados pra `features/results/` (o game-host
+    desmontava antes dela aparecer). **ITO verificado ponta a ponta contra o
+    servidor** (consensus, 2 rodadas). 16 testes web verdes.
+  - [ ] **`chore/web-deploy`** — **adiado pra Fase 4** (item 23): deployar a web
+    sozinha apontando pra `ws://localhost` não serve; sobe junto com servidor +
+    Redis + Postgres. Config: root `apps/web`, build `ng build`, output
+    `apps/web/dist/web/browser`.
+
+  **➡️ Web MVP funcional.** Criar/entrar, lobby, ready-check, Contador e ITO
+  jogáveis ponta a ponta. Falta: polish opcional (reconexão na UI, passada
+  visual contra o preview) e o deploy (Fase 4). **RETOMAR: Fase 3 — Flutter**
+  (precisa Android Studio + Flutter SDK instalados; `flutter doctor` verde).
 - [ ] Fase 3 — Mobile (Flutter) MVP
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
