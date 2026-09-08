@@ -9,10 +9,9 @@
 > - **Regra:** qualquer mudança aqui mexe em servidor + Angular + Flutter na
 >   mesma leva, com commit `feat(protocol)!:` / `BREAKING CHANGE:`.
 >
-> **Status:** primeira versão (Fase 0). A seção “lobby_state” ainda descreve o
-> comportamento *alvo* — hoje o estado da sala vai por `@colyseus/schema`. A
-> troca para JSON acontece na Fase 1 (`feat/server-cors-json`); ao concluir,
-> remover este aviso.
+> **Status:** fechado na Fase 1. O protocolo é 100% JSON — o servidor não usa
+> mais `@colyseus/schema` para falar com os clientes. Coberto pelo teste de
+> integração `apps/server/src/rooms/LobbyRoom.test.ts`.
 
 ---
 
@@ -112,7 +111,7 @@ cliente) em `apps/*/**/games/<jogo>`.
 
 ## 5. Eventos — servidor → cliente
 
-### `lobby_state`  *(alvo — Fase 1)*
+### `lobby_state`
 Estado completo da sala, reenviado **inteiro a cada mudança** (entrou/saiu
 jogador, mudou fase, mudou host, alguém ficou pronto).
 
@@ -130,11 +129,9 @@ jogador, mudou fase, mudou host, alguém ficou pronto).
 }
 ```
 
-Tipo: `LobbyStatePayload` em `packages/protocol/src/events.ts`.
-
-> Hoje (pré-Fase 1) esses campos chegam via `@colyseus/schema` em `room.state`.
-> Os clientes Angular/Flutter devem consumir **só** o evento `lobby_state` e
-> ignorar `room.state`.
+Tipo: `LobbyStatePayload` em `packages/protocol/src/events.ts`. O servidor emite
+este evento no `onJoin`, `onLeave`, e a cada transição de fase / mudança de host
+/ toggle de "pronto".
 
 ### `game_state`
 Estado do jogo **na visão de um jogador específico** — pode esconder informação
