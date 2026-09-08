@@ -608,10 +608,12 @@ existência de uma "tela mestre"/TV.
   - [x] `feat/mobile-lobby` — `HomePage` (apelido + criar/entrar), `SalaPage`
     (rota única, segue `room.phase`), `LobbyPage` (código, jogadores, catálogo),
     `ReadyCheckPage`. `catalog.dart` espelha `catalog.ts`. 12 testes verdes.
-  - [ ] **`feat/mobile-game-host`** ← RETOMAR AQUI. Registry de jogo no cliente
-    (`Map<String, WidgetBuilder>`) + tela do Contador + tela de resultados.
-    Espelha `apps/web/src/app/features/{game-host,games/_template,results}/`.
-    (No `SalaPage`, trocar o `_PlayingPlaceholder` pelo host real.)
-  - [ ] `feat/mobile-ito` — telas do ITO (espelhar `features/games/ito/` da web).
+  - [x] `feat/mobile-game-host` — `game_registry.dart` (`Map<String,
+    WidgetBuilder>`), `TemplateCounterPage`, `ResultsPage` (confetti + ranking).
+    `SalaPage` prioriza `results` sobre a fase. 16 testes verdes.
+  - [ ] **`feat/mobile-ito`** ← RETOMAR AQUI. Telas do ITO em
+    `features/games/ito/` — espelhar `apps/web/src/app/features/games/ito/`
+    (`ito-host`/`clue`/`board`/`reveal` + `ito.types.ts`). Registrar em
+    `game_registry.dart`. Modos consensus e individual.
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
