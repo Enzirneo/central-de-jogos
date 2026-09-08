@@ -17,7 +17,10 @@ class FakeRoomHandle implements RoomHandle {
   send(type: string, payload?: unknown): void {
     this.sent.push({ type, payload });
   }
-  onLeave(): void {}
+  leaveCb: ((code: number) => void) | null = null;
+  onLeave(cb: (code: number) => void): void {
+    this.leaveCb = cb;
+  }
   onError(): void {}
   leave(): void {}
 
@@ -84,6 +87,30 @@ describe('RoomStore', () => {
     expect(store.error()).toBe('Só o host escolhe.');
     store.clearError();
     expect(store.error()).toBeNull();
+  });
+
+  it('queda não-limpa dispara reconexão e re-liga na sala', async () => {
+    const nova = new FakeRoomHandle();
+    nova.sessionId = 'me-1';
+    nova.reconnectionToken = 'tok-2';
+    (TestBed.inject(ColyseusService) as unknown as { reconnect: () => Promise<RoomHandle> }).reconnect =
+      async () => nova;
+
+    fake.leaveCb?.(4000); // código != 1000 = queda
+    expect(store.reconnecting()).toBe(true);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(store.reconnecting()).toBe(false);
+    expect(store.connected()).toBe(true);
+
+    nova.emit(SERVER_EVENTS.LOBBY_STATE, lobbyState({ code: 'ABCD' }));
+    expect(store.code()).toBe('ABCD');
+  });
+
+  it('saída limpa (código 1000) não tenta reconectar', () => {
+    fake.leaveCb?.(1000);
+    expect(store.reconnecting()).toBe(false);
+    expect(store.connected()).toBe(false);
   });
 
   it('os métodos enviam os eventos certos ao servidor', () => {

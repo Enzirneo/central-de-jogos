@@ -6,5 +6,5 @@ import { RoomStore } from '../colyseus/room.store';
 export const connectedGuard: CanActivateFn = () => {
   const store = inject(RoomStore);
   const router = inject(Router);
-  return store.connected() ? true : router.createUrlTree(['/']);
+  return store.connected() || store.reconnecting() ? true : router.createUrlTree(['/']);
 };
