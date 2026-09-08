@@ -6,12 +6,8 @@ import type {
   LobbyStatePayload,
   RoomPhase,
 } from "@central-de-jogos/protocol";
-import {
-  CLIENT_EVENTS,
-  SERVER_EVENTS,
-  joinOptionsSchema,
-  selectGamePayloadSchema,
-} from "@central-de-jogos/protocol";
+import { CLIENT_EVENTS, SERVER_EVENTS } from "@central-de-jogos/protocol";
+import { joinOptionsSchema, selectGamePayloadSchema } from "../protocol-validation";
 import { generateRoomCode } from "../utils/roomCode";
 import { getGamePlugin } from "../games/registry";
 

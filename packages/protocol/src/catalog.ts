@@ -13,20 +13,32 @@ export interface GameCatalogEntry {
   displayName: string;
   minPlayers: number;
   maxPlayers: number;
+  /** Emoji mostrado no card do jogo. */
+  icon: string;
+  /** Cor de destaque do jogo (CSS color). A tela do jogo usa como --cj-game-accent. */
+  accent: string;
+  /** Frase curta pro card. */
+  tagline: string;
 }
 
 export const GAME_CATALOG: GameCatalogEntry[] = [
   {
     id: "_template",
-    displayName: "Contador (jogo de teste)",
+    displayName: "Contador",
     minPlayers: 1,
     maxPlayers: 12,
+    icon: "🔢",
+    accent: "hsl(152 40% 52%)",
+    tagline: "Jogo de teste — clique até o alvo.",
   },
   {
     id: "ito",
     displayName: "ITO",
     minPlayers: 3,
     maxPlayers: 8,
+    icon: "🌡️",
+    accent: "hsl(190 75% 55%)",
+    tagline: "Ordenem os números sem falar.",
   },
 ];
 
