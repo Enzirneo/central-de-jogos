@@ -101,11 +101,15 @@ export class GameHost {
   protected showingResults = computed(() => this.store.results() !== null);
 
   constructor() {
-    // Carrega componente quando o jogo ativo muda
+    // Carrega componente quando o jogo ativo muda; reseta quando fica vazio
     effect(() => {
       const gameId = this.store.activeGameId();
-      if (gameId && !this.gameComponent()) {
-        this.loadAndSetGameComponent(gameId);
+      if (gameId) {
+        if (!this.gameComponent()) {
+          this.loadAndSetGameComponent(gameId);
+        }
+      } else {
+        this.gameComponent.set(null);
       }
     });
 
