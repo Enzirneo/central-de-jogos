@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, master]
+  pull_request:
+    branches: [dev, master]
+
+jobs:
+  checks:
+    name: lint + test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20 # mesma major do apps/server/Dockerfile
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint (tsc --noEmit)
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+  # Adicionado na Fase 3, quando apps/mobile existir:
+  # flutter:
+  #   name: flutter analyze + test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: subosito/flutter-action@v2
+  #       with: { channel: stable }
+  #     - run: flutter pub get
+  #       working-directory: apps/mobile
+  #     - run: flutter analyze
+  #       working-directory: apps/mobile
+  #     - run: flutter test
+  #       working-directory: apps/mobile
