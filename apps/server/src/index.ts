@@ -4,8 +4,7 @@ import express from "express";
 import cors from "cors";
 import { Server, matchMaker } from "@colyseus/core";
 import { WebSocketTransport } from "@colyseus/ws-transport";
-import { EchoRoom } from "./rooms/EchoRoom";
-import { LobbyRoom } from "./rooms/LobbyRoom";
+import { defineRooms } from "./app";
 import { checkPostgresConnection } from "./db";
 import { checkRedisConnection } from "./redis";
 import { PORT, allowedOrigins } from "./config";
@@ -31,8 +30,7 @@ if (origins) {
   };
 }
 
-gameServer.define("echo", EchoRoom);
-gameServer.define("lobby", LobbyRoom).filterBy(["code"]);
+defineRooms(gameServer);
 
 app.get("/", (_req, res) => {
   res.send("Central de Jogos - servidor Colyseus rodando");
