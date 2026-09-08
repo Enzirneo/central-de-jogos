@@ -11,7 +11,7 @@ import type { Type } from '@angular/core';
  */
 export const GAME_REGISTRY: Record<string, () => Promise<Type<unknown>>> = {
   _template: () => import('../../features/games/_template/template-counter').then(m => m.TemplateCounter),
-  // ito: () => import('../../features/games/ito/ito-host').then(m => m.ItoHost),
+  ito: () => import('../../features/games/ito/ito-host').then(m => m.ItoHost),
 };
 
 export async function loadGameComponent(gameId: string): Promise<Type<unknown> | undefined> {
