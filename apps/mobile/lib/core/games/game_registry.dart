@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../features/games/ito/ito_config.dart';
 import '../../features/games/ito/ito_host_page.dart';
 import '../../features/games/template_counter_page.dart';
 
@@ -13,5 +14,15 @@ const gameScreens = <String, WidgetBuilder>{
 
 Widget _templateBuilder(BuildContext _) => const TemplateCounterPage();
 Widget _itoBuilder(BuildContext _) => const ItoHostPage();
+
+/// Telas de config pré-jogo (opcionais). Só jogos com opções que o host escolhe
+/// antes de começar (modo, rodadas) entram aqui — aparece na tela de "pronto".
+const gameConfigScreens = <String, WidgetBuilder>{
+  'ito': _itoConfigBuilder,
+};
+
+Widget _itoConfigBuilder(BuildContext _) => const ItoConfig();
+
+WidgetBuilder? gameConfigFor(String gameId) => gameConfigScreens[gameId];
 
 WidgetBuilder? gameScreenFor(String gameId) => gameScreens[gameId];

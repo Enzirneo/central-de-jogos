@@ -28,6 +28,7 @@ _LobbyStatePayload _$LobbyStatePayloadFromJson(Map<String, dynamic> json) =>
       hostId: json['hostId'] as String,
       activeGameId: json['activeGameId'] as String? ?? '',
       pendingGameId: json['pendingGameId'] as String? ?? '',
+      pendingGameOptions: json['pendingGameOptions'],
       players:
           (json['players'] as List<dynamic>?)
               ?.map((e) => LobbyPlayer.fromJson(e as Map<String, dynamic>))
@@ -42,6 +43,7 @@ Map<String, dynamic> _$LobbyStatePayloadToJson(_LobbyStatePayload instance) =>
       'hostId': instance.hostId,
       'activeGameId': instance.activeGameId,
       'pendingGameId': instance.pendingGameId,
+      'pendingGameOptions': instance.pendingGameOptions,
       'players': instance.players,
     };
 

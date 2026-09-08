@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { findCatalogEntry } from '@central-de-jogos/protocol';
 import { RoomStore } from '../../core/colyseus/room.store';
 import { Button, Card, PlayerChip, Screen } from '../../shared/ui';
+import { GameConfig } from '../game-config/game-config';
 
 @Component({
   selector: 'app-ready-check',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Card, PlayerChip, Screen],
+  imports: [Button, Card, PlayerChip, Screen, GameConfig],
   template: `
     <cj-screen [center]="true">
       <header>
@@ -26,6 +27,8 @@ import { Button, Card, PlayerChip, Screen } from '../../shared/ui';
         }
         <p class="tally">{{ readyCount() }} de {{ store.players().length }} prontos</p>
       </cj-card>
+
+      <app-game-config />
 
       <cj-button
         [block]="true"

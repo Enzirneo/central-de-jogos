@@ -37,6 +37,8 @@ export class RoomStore {
   readonly hostId = signal('');
   readonly activeGameId = signal('');
   readonly pendingGameId = signal('');
+  /** Config do jogo proposto, escolhida pelo host (opaca — o jogo interpreta). */
+  readonly pendingGameOptions = signal<unknown>(null);
   readonly players = signal<readonly LobbyPlayerView[]>([]);
 
   readonly gameState = signal<unknown>(null);
@@ -58,6 +60,10 @@ export class RoomStore {
 
   selectGame(gameId: string, options?: unknown): void {
     this.handle?.send(CLIENT_EVENTS.SELECT_GAME, { gameId, options });
+  }
+  /** Host ajusta a config do jogo proposto durante a fase `starting`. */
+  setGameOptions(options: unknown): void {
+    this.handle?.send(CLIENT_EVENTS.SET_GAME_OPTIONS, { options });
   }
   toggleReady(): void {
     this.handle?.send(CLIENT_EVENTS.TOGGLE_READY);
@@ -113,6 +119,7 @@ export class RoomStore {
       this.phase.set(s.phase);
       this.hostId.set(s.hostId);
       this.activeGameId.set(s.activeGameId);
+      this.pendingGameOptions.set(s.pendingGameOptions);
       this.pendingGameId.set(s.pendingGameId);
       this.players.set(s.players);
       if (s.phase !== 'playing') {

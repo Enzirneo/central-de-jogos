@@ -20,6 +20,7 @@ abstract class RoomState with _$RoomState {
     @Default('') String hostId,
     @Default('') String activeGameId,
     @Default('') String pendingGameId,
+    Object? pendingGameOptions,
     @Default(<LobbyPlayer>[]) List<LobbyPlayer> players,
     Object? gameState,
     Map<String, dynamic>? results,

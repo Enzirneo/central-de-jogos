@@ -23,6 +23,11 @@ export const selectGamePayloadSchema = z.object({
   options: z.unknown().optional(),
 });
 
+/** `set_game_options`: o host ajusta a config do jogo proposto (fase starting). */
+export const setGameOptionsPayloadSchema = z.object({
+  options: z.unknown(),
+});
+
 /**
  * `game_action`: payload específico do jogo ativo, validado pelo
  * `GamePlugin.applyAction` dele (CLAUDE.md §4). Aqui é opaco.

@@ -84,6 +84,19 @@ Propor um jogo. **Só o host, só na fase `lobby`.**
 - Regras de negócio que também podem recusar: não é host, fase errada, jogo fora
   do catálogo, número de jogadores fora de `minPlayers..maxPlayers`.
 
+### `set_game_options`
+Ajustar a configuração do jogo proposto. **Só o host, só na fase `starting`.**
+
+```json
+{ "options": { "mode": "individual", "rounds": { "type": "fixed", "totalRounds": 3 } } }
+```
+
+- `options` (opaco): mesmo formato que `select_game.options` — o jogo valida em
+  `createInitialState`. Validação de estrutura: `setGameOptionsPayloadSchema`.
+- O servidor guarda em `pendingGameOptions` e **reseta todos os “prontos”** (pra
+  ninguém entrar num modo que não escolheu), rebroadcasta `lobby_state`.
+- Usado pela tela de config pré-jogo (ex: modo/rodadas do ITO na tela de “pronto”).
+
 ### `toggle_ready`
 Alternar o próprio “pronto”. **Só na fase `starting`.** Sem payload.
 
@@ -122,6 +135,7 @@ jogador, mudou fase, mudou host, alguém ficou pronto).
   "hostId": "aBc123",
   "activeGameId": "",
   "pendingGameId": "ito",
+  "pendingGameOptions": { "mode": "consensus", "rounds": { "type": "fixed", "totalRounds": 5 } },
   "players": [
     { "id": "aBc123", "nickname": "Ana",  "connected": true,  "ready": true },
     { "id": "xYz789", "nickname": "Beto", "connected": false, "ready": false }
@@ -172,6 +186,7 @@ para `game_action` fora de hora.
 | Evento | Direção | Fase | Payload |
 |---|---|---|---|
 | `select_game` | C→S | lobby | `{ gameId, options? }` |
+| `set_game_options` | C→S | starting (host) | `{ options }` |
 | `toggle_ready` | C→S | starting | — |
 | `cancel_start` | C→S | starting | — |
 | `game_action` | C→S | playing | opaco (do jogo) |
