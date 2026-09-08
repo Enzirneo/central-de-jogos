@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.expo/
+.expo-shared/
+web-build/
+.turbo/
+*.log
+.env
+.DS_Store

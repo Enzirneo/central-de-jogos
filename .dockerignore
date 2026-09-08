@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# Dependências (reinstaladas dentro da imagem)
+**/node_modules
+
+# Artefatos de build/cache
+**/dist
+**/.turbo
+**/.expo
+**/.expo-shared
+**/web-build
+
+# App Expo/mobile — não faz parte da imagem do servidor (a imagem só usa o
+# package.json dele para o npm workspaces resolver o lockfile corretamente)
+apps/mobile-web/assets
+apps/mobile-web/android
+apps/mobile-web/ios
+
+# Segredos e env
+.env
+.env.*
+!.env.example
+
+# Diversos
+*.log
+.DS_Store
+.vscode
+README.md

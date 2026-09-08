@@ -1,0 +1,19 @@
+{
+  "name": "@central-de-jogos/game-template",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsx --test src/*.test.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@central-de-jogos/shared-types": "*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
