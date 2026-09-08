@@ -11,14 +11,11 @@ WORKDIR /app
 # do Docker enquanto o código-fonte muda com mais frequência que as dependências.
 COPY package.json package-lock.json turbo.json ./
 COPY apps/server/package.json apps/server/package.json
-COPY apps/mobile-web/package.json apps/mobile-web/package.json
 COPY packages/shared-types/package.json packages/shared-types/package.json
-COPY packages/ui/package.json packages/ui/package.json
 COPY packages/games/_template/package.json packages/games/_template/package.json
 COPY packages/games/ito/package.json packages/games/ito/package.json
 
-# Instala só o necessário para o workspace do servidor (não baixa as
-# dependências pesadas do Expo/React Native do app mobile-web).
+# Instala só o necessário para o workspace do servidor.
 RUN npm ci --workspace=@central-de-jogos/server --include-workspace-root
 
 COPY apps/server apps/server

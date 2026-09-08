@@ -1,12 +1,18 @@
 node_modules/
 dist/
-.expo/
-.expo-shared/
-web-build/
 .turbo/
 *.log
 .env
 .DS_Store
+
+# Angular (apps/web) — adicionado na Fase 2
+apps/web/dist/
+.angular/
+
+# Flutter (apps/mobile) — adicionado na Fase 3
+apps/mobile/build/
+apps/mobile/.dart_tool/
+apps/mobile/ios/Pods/
 
 # estado local dos hooks .claude (não versionar)
 .claude/tdd-state.json
