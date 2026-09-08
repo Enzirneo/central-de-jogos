@@ -605,10 +605,13 @@ existência de uma "tela mestre"/TV.
     Notifier) + `RoomState`/`LobbyStatePayload` freezed espelham o `RoomStore`
     da web (inclui reconexão). Verificado ponta a ponta contra o servidor.
     9 testes verdes.
-  - [ ] **`feat/mobile-lobby`** ← RETOMAR AQUI. Telas home / lobby / ready-check
-    em `features/`, lendo o `roomControllerProvider`. Espelha
-    `apps/web/src/app/features/{home,lobby,ready-check}/`.
-  - [ ] `feat/mobile-game-host` — registry + Contador ponta a ponta.
-  - [ ] `feat/mobile-ito` — telas do ITO.
+  - [x] `feat/mobile-lobby` — `HomePage` (apelido + criar/entrar), `SalaPage`
+    (rota única, segue `room.phase`), `LobbyPage` (código, jogadores, catálogo),
+    `ReadyCheckPage`. `catalog.dart` espelha `catalog.ts`. 12 testes verdes.
+  - [ ] **`feat/mobile-game-host`** ← RETOMAR AQUI. Registry de jogo no cliente
+    (`Map<String, WidgetBuilder>`) + tela do Contador + tela de resultados.
+    Espelha `apps/web/src/app/features/{game-host,games/_template,results}/`.
+    (No `SalaPage`, trocar o `_PlayingPlaceholder` pelo host real.)
+  - [ ] `feat/mobile-ito` — telas do ITO (espelhar `features/games/ito/` da web).
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
