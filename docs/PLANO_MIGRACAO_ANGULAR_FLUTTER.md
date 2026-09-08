@@ -584,10 +584,13 @@ existência de uma "tela mestre"/TV.
     Redis + Postgres. Config: root `apps/web`, build `ng build`, output
     `apps/web/dist/web/browser`.
 
-  **➡️ Web MVP funcional.** Criar/entrar, lobby, ready-check, Contador e ITO
-  jogáveis ponta a ponta. Falta: polish opcional (reconexão na UI, passada
-  visual contra o preview) e o deploy (Fase 4). **RETOMAR: Fase 3 — Flutter**
-  (precisa Android Studio + Flutter SDK instalados; `flutter doctor` verde).
+  - [x] `feat/web-reconexao` — queda de conexão → `client.reconnect` automático
+    (~60s), barra "Reconectando…". Fecha o último buraco funcional da web.
+
+  **➡️ Web MVP completo.** Criar/entrar, lobby, ready-check, Contador e ITO
+  ponta a ponta, com reconexão. Falta só o deploy (Fase 4). **RETOMAR: Fase 3 —
+  Flutter** (usuário instalando Android Studio + Flutter SDK; `flutter doctor`
+  verde antes de começar).
 - [ ] Fase 3 — Mobile (Flutter) MVP
 - [ ] Fase 4 — Paridade, escala e deploy
 - [ ] Fase 5 — Novos jogos (contínuo)
