@@ -5,6 +5,7 @@
 // ignore_for_file: avoid_print
 import 'package:central_de_jogos/core/colyseus/colyseus_client.dart';
 import 'package:central_de_jogos/core/models/wire.dart';
+import 'package:central_de_jogos/features/games/ito/ito_types.dart';
 
 Future<void> main() async {
   final client = ColyseusClient('http://localhost:2567');
@@ -45,8 +46,38 @@ Future<void> main() async {
   await Future<void>.delayed(const Duration(milliseconds: 300));
   print('game_over: $over');
 
+  // --- ITO: 3 jogadores, 2 rodadas, parseando com ItoView ---
+  final third = await client.join(lastLobby!.code, 'Cléo');
+  ItoView? ito;
+  host.onMessage(ServerEvents.gameState,
+      (p) => ito = ItoView((p! as Map).cast<String, dynamic>()));
+  await Future<void>.delayed(const Duration(milliseconds: 200));
+  host.send(ClientEvents.selectGame, {
+    'gameId': 'ito',
+    'options': {'mode': 'consensus', 'rounds': {'type': 'fixed', 'totalRounds': 2}},
+  });
+  await Future<void>.delayed(const Duration(milliseconds: 200));
+  for (final r in [host, guest, third]) {
+    r.send('toggle_ready');
+  }
+  await Future<void>.delayed(const Duration(milliseconds: 400));
+  print('ITO ${ito?.phase}  meu nº ${ito?.myNumber}  tema "${ito?.theme}"');
+  for (final r in [host, guest, third]) {
+    r.send('game_action', {'type': 'submit_clue', 'clue': 'x'});
+  }
+  await Future<void>.delayed(const Duration(milliseconds: 400));
+  print('ITO ${ito?.phase}  board ${ito?.board.length}  '
+      'dicas ${ito?.cards.values.where((c) => c.hasSubmittedClue).length}');
+  for (final r in [host, guest, third]) {
+    r.send('game_action', {'type': 'ready_to_reveal'});
+  }
+  await Future<void>.delayed(const Duration(milliseconds: 400));
+  print('ITO ${ito?.phase}  ordem certa ${ito?.lastRoundResult?.correctOrder.length}  '
+      'nºs ${ito?.cards.values.map((c) => c.number).toList()}');
+
   await host.leave();
   await guest.leave();
+  await third.leave();
   client.close();
   print('OK');
 }

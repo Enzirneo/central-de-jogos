@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../features/games/ito/ito_host_page.dart';
 import '../../features/games/template_counter_page.dart';
 
 /// Mapa `id do jogo → widget da tela`. Espelha `game-registry.ts` da web e o
@@ -7,9 +8,10 @@ import '../../features/games/template_counter_page.dart';
 /// aqui. Jogo novo = uma linha aqui + a pasta em `features/games/`.
 const gameScreens = <String, WidgetBuilder>{
   '_template': _templateBuilder,
-  // 'ito': ... (feat/mobile-ito)
+  'ito': _itoBuilder,
 };
 
 Widget _templateBuilder(BuildContext _) => const TemplateCounterPage();
+Widget _itoBuilder(BuildContext _) => const ItoHostPage();
 
 WidgetBuilder? gameScreenFor(String gameId) => gameScreens[gameId];
