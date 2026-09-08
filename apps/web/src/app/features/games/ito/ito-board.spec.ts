@@ -52,17 +52,15 @@ describe('ItoBoard', () => {
     expect(el.querySelector('.slot .nm')?.textContent).toContain('Ana');
   });
 
-  it('mover pra baixo troca a ordem e envia reorder_board', () => {
+  it('soltar numa nova posição reordena e envia reorder_board', () => {
     const sent: unknown[] = [];
     (store as unknown as { handle: unknown }).handle = { send: (t: string, p: unknown) => sent.push({ t, p }) };
 
     const cmp = fixture.componentInstance as unknown as {
-      select(i: number): void;
-      move(d: -1 | 1): void;
+      drop(e: { previousIndex: number; currentIndex: number }): void;
       order(): string[];
     };
-    cmp.select(0);
-    cmp.move(1);
+    cmp.drop({ previousIndex: 0, currentIndex: 1 });
 
     expect(cmp.order()).toEqual(['p2', 'p1', 'p3']);
     expect(sent).toEqual([{ t: 'game_action', p: { type: 'reorder_board', order: ['p2', 'p1', 'p3'] } }]);

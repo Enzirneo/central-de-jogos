@@ -5,20 +5,25 @@ import {
   inject,
   input,
   linkedSignal,
-  signal,
 } from '@angular/core';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDropList,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { RoomStore } from '../../../core/colyseus/room.store';
 import { Button, Card, Screen } from '../../../shared/ui';
 import type { ItoStateForPlayer } from './ito.types';
 
 /**
- * Fase `organizing`: ordenar as cartas do menor pro maior, só pelas dicas.
- * `consensus` = um quadro pra todos; `individual` = o palpite privado de cada um.
+ * Fase `organizing`: arrastar as cartas pra ordenar do menor pro maior, só pelas
+ * dicas. `consensus` = um quadro pra todos; `individual` = o palpite de cada um.
  */
 @Component({
   selector: 'app-ito-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Card, Screen],
+  imports: [Button, Card, Screen, CdkDropList, CdkDrag],
   template: `
     <cj-screen>
       <header>
@@ -27,31 +32,21 @@ import type { ItoStateForPlayer } from './ito.types';
           {{ state().mode === 'consensus' ? 'quadro do grupo' : 'seu palpite' }}
         </p>
         <h1>Do menor pro maior</h1>
-        <p class="hint">Toque num nome, depois ↑ / ↓. Só as dicas — nada de dizer números.</p>
+        <p class="hint">Arraste as cartas pra ordenar. Só as dicas — nada de dizer números.</p>
       </header>
 
-      <cj-card class="board">
+      <cj-card class="board" cdkDropList (cdkDropListDropped)="drop($event)">
         @for (id of order(); track id; let i = $index) {
-          <button
-            type="button"
-            class="slot"
-            [class.sel]="selected() === i"
-            [class.self]="id === me()"
-            (click)="select(i)"
-          >
+          <div class="slot" [class.self]="id === me()" cdkDrag>
             <span class="pos">{{ i + 1 }}</span>
             <span class="who">
               <span class="nm">{{ name(id) }}</span>
               <span class="clue">"{{ clue(id) }}"</span>
             </span>
-          </button>
+            <span class="grip" cdkDragHandle aria-hidden="true">⠿</span>
+          </div>
         }
       </cj-card>
-
-      <div class="moves">
-        <cj-button variant="ghost" [disabled]="!canMove(-1)" (click)="move(-1)">↑ subir</cj-button>
-        <cj-button variant="ghost" [disabled]="!canMove(1)" (click)="move(1)">↓ descer</cj-button>
-      </div>
 
       <cj-card class="ready">
         <p class="rc">{{ state().readyToReveal.length }} de {{ order().length }} prontos pra revelar</p>
@@ -76,22 +71,27 @@ import type { ItoStateForPlayer } from './ito.types';
     .board { display: flex; flex-direction: column; gap: 0.4rem; }
     .slot {
       display: flex; align-items: center; gap: 0.7rem; width: 100%;
-      padding: 0.6rem 0.7rem; border-radius: 0.7rem; text-align: left;
+      padding: 0.6rem 0.7rem; border-radius: 0.7rem;
       background: hsl(160 12% 13% / 0.55); border: 1px solid var(--cj-border);
-      color: var(--cj-fg); font: inherit; cursor: pointer;
-      transition: border-color var(--cj-dur), background var(--cj-dur);
+      color: var(--cj-fg);
     }
-    .slot.sel { border-color: var(--cj-game-accent); background: color-mix(in srgb, var(--cj-game-accent) 12%, transparent); }
     .slot.self .nm::after { content: ' (você)'; color: var(--cj-muted); font-weight: 400; }
+    .slot.cdk-drag-preview {
+      border-color: var(--cj-game-accent);
+      box-shadow: 0 12px 30px -10px hsl(0 0% 0% / 0.6);
+    }
+    .slot.cdk-drag-placeholder { opacity: 0.35; }
+    .board.cdk-drop-list-dragging .slot:not(.cdk-drag-placeholder) {
+      transition: transform var(--cj-dur) var(--cj-ease);
+    }
     .pos {
       font-family: var(--cj-font-display); font-weight: 700; font-size: 1.1rem;
       color: var(--cj-muted); width: 1.5rem; flex-shrink: 0; text-align: center;
     }
-    .who { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+    .who { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1; }
     .nm { font-weight: 500; }
     .clue { font-size: 0.78rem; color: var(--cj-muted); font-style: italic; word-break: break-word; }
-    .moves { display: flex; gap: 0.5rem; }
-    .moves cj-button { flex: 1; }
+    .grip { color: var(--cj-muted); cursor: grab; font-size: 1.1rem; touch-action: none; }
     .ready { display: flex; flex-direction: column; gap: 0.6rem; text-align: center; }
     .rc { margin: 0; font-size: 0.85rem; color: var(--cj-muted); }
   `,
@@ -103,7 +103,6 @@ export class ItoBoard {
 
   /** Cópia de trabalho da ordem: reseta quando o servidor manda um quadro novo. */
   protected readonly order = linkedSignal(() => this.state().board);
-  protected readonly selected = signal<number | null>(null);
 
   protected readonly me = computed(() => this.store.mySessionId());
   protected readonly iAmReady = computed(() => this.state().readyToReveal.includes(this.me()));
@@ -115,22 +114,11 @@ export class ItoBoard {
     return this.state().cards[id]?.clue ?? '…';
   }
 
-  protected select(i: number): void {
-    this.selected.set(this.selected() === i ? null : i);
-  }
-
-  protected canMove(dir: -1 | 1): boolean {
-    const i = this.selected();
-    return i !== null && i + dir >= 0 && i + dir < this.order().length;
-  }
-
-  protected move(dir: -1 | 1): void {
-    const i = this.selected();
-    if (i === null || !this.canMove(dir)) return;
+  protected drop(event: CdkDragDrop<readonly string[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
     const next = [...this.order()];
-    [next[i], next[i + dir]] = [next[i + dir], next[i]];
+    moveItemInArray(next, event.previousIndex, event.currentIndex);
     this.order.set(next);
-    this.selected.set(i + dir);
     this.store.sendAction({ type: 'reorder_board', order: next });
   }
 
