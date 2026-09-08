@@ -1,0 +1,30 @@
+/* Helpers reutilizáveis de estilo. Use com `@use 'styles/mixins' as m;`. */
+
+/* Cartão de vidro fosco (glassmorphism) — a superfície padrão da UI. */
+@mixin glass {
+  background-color: var(--cj-surface);
+  background-image: var(--cj-gradient-card);
+  backdrop-filter: blur(18px);
+  border: 1px solid hsl(160 12% 16% / 0.8);
+  border-radius: calc(var(--cj-radius) + 4px);
+  box-shadow: var(--cj-shadow-elegant);
+}
+
+/* Grade pontilhada com máscara radial — fundo de telas "hero". */
+@mixin grid-bg($size: 34px) {
+  background-image: linear-gradient(hsl(160 12% 16% / 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(160 12% 16% / 0.35) 1px, transparent 1px);
+  background-size: $size $size;
+  -webkit-mask-image: radial-gradient(ellipse at top, black, transparent 65%);
+  mask-image: radial-gradient(ellipse at top, black, transparent 65%);
+}
+
+/* Entrada suave — subir + aparecer. Respeita prefers-reduced-motion. */
+@mixin rise($delay: 0s) {
+  animation: cj-rise 0.55s var(--cj-ease) both;
+  animation-delay: $delay;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.001ms;
+  }
+}
