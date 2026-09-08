@@ -1,0 +1,15 @@
+import 'package:flutter/widgets.dart';
+
+import '../../features/games/template_counter_page.dart';
+
+/// Mapa `id do jogo → widget da tela`. Espelha `game-registry.ts` da web e o
+/// `registry.ts` do servidor: a Central nunca importa um jogo direto, só por
+/// aqui. Jogo novo = uma linha aqui + a pasta em `features/games/`.
+const gameScreens = <String, WidgetBuilder>{
+  '_template': _templateBuilder,
+  // 'ito': ... (feat/mobile-ito)
+};
+
+Widget _templateBuilder(BuildContext _) => const TemplateCounterPage();
+
+WidgetBuilder? gameScreenFor(String gameId) => gameScreens[gameId];
