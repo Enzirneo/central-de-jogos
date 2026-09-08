@@ -1,5 +1,5 @@
 {
-  "name": "@central-de-jogos/shared-types",
+  "name": "@central-de-jogos/protocol",
   "version": "0.0.0",
   "private": true,
   "main": "dist/index.js",

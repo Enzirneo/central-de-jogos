@@ -1,4 +1,4 @@
-import type { GamePlugin } from "@central-de-jogos/shared-types";
+import type { GamePlugin } from "@central-de-jogos/protocol";
 import { templateGame } from "@central-de-jogos/game-template";
 import { itoGame } from "@central-de-jogos/game-ito";
 

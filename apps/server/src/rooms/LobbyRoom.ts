@@ -1,5 +1,5 @@
 import { Room, Client, matchMaker } from "@colyseus/core";
-import type { GamePlugin } from "@central-de-jogos/shared-types";
+import type { GamePlugin } from "@central-de-jogos/protocol";
 import { LobbyState, PlayerState } from "./schema/LobbyState";
 import { generateRoomCode } from "../utils/roomCode";
 import { getGamePlugin } from "../games/registry";
