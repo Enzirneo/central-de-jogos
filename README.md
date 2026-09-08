@@ -2,21 +2,24 @@
 
 Plataforma multiplayer local/remoto no estilo Jackbox Games. Veja [CLAUDE.md](./CLAUDE.md) para a arquitetura completa do projeto.
 
+> ⚠️ **Migração de stack em andamento** — os clientes estão sendo trocados por
+> Angular (web) e Flutter (mobile). Ver [docs/PLANO_MIGRACAO_ANGULAR_FLUTTER.md](./docs/PLANO_MIGRACAO_ANGULAR_FLUTTER.md).
+
 ## Estrutura
 
 ```
 apps/
-  mobile-web/   # App Expo (iOS + Android + Web)
-  server/       # Servidor Colyseus (Node.js)
+  server/       # Servidor Colyseus (Node.js) — fonte da verdade
+  web/          # (Fase 2) App Angular
+  mobile/       # (Fase 3) App Flutter
 packages/
-  shared-types/ # Tipos TS compartilhados entre cliente e servidor
-  ui/           # Componentes visuais reutilizáveis
+  shared-types/ # Tipos TS compartilhados (renomeado p/ protocol na Fase 0)
   games/        # Um jogo por pasta, plugável na Central
 ```
 
 ## Rodando o servidor localmente (Docker)
 
-O servidor (`apps/server`) roda em Docker junto com Postgres e Redis. Esse é o único componente do projeto que usa Docker — o app Expo **não** é containerizado (veja seção abaixo).
+O servidor (`apps/server`) roda em Docker junto com Postgres e Redis. Esse é o único componente do projeto que usa Docker — os clientes (Angular/Flutter) **não** são containerizados.
 
 1. Copie o arquivo de variáveis de ambiente:
    ```
@@ -54,18 +57,16 @@ docker compose down
 
 ## Produção
 
-O Railway builda o **mesmo** `Dockerfile` de `apps/server/Dockerfile`, sem nenhuma alteração — ele aponta para o Postgres/Redis gerenciados do Railway via as mesmas variáveis de ambiente (`DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`), configuradas lá no painel do serviço. O `docker-compose.yml` da raiz é usado **só** em desenvolvimento local; em produção o Railway não usa o compose.
+O servidor builda o `Dockerfile` de `apps/server/Dockerfile` sem alteração,
+apontando para Postgres/Redis gerenciados via variáveis de ambiente
+(`DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`). A hospedagem será decidida na Fase 4
+(ver o plano de migração). O `docker-compose.yml` da raiz é usado **só** em
+desenvolvimento local.
 
-## Rodando o app Expo (mobile-web)
+## Clientes
 
-Sem Docker — roda direto com Node/npm:
+- **`apps/web`** (Angular) — criado na Fase 2. Deploy estático na Vercel, sem Docker.
+- **`apps/mobile`** (Flutter) — criado na Fase 3. `flutter run` em Android; sem Docker.
 
-```
-cd apps/mobile-web
-npm run web       # abre no navegador
-npm run start      # abre o Expo Go (QR code) para testar no celular
-```
-
-Para testar no celular físico, troque `DEFAULT_HOST` em `apps/mobile-web/App.tsx` (ou defina `EXPO_PUBLIC_SERVER_URL`) pelo IP local da máquina rodando o servidor — o celular não enxerga `localhost` do computador.
-
-Deploy da versão web é feito no Vercel a partir de `expo export --platform web`, direto do repositório — sem Docker. Build de iOS/Android usa o EAS Build (serviço de build em nuvem do Expo) — também sem Docker.
+Enquanto não existem, use o `docs/contrato-wire.md` (Fase 0) para saber o que o
+servidor fala.
