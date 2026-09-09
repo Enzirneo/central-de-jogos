@@ -13,6 +13,7 @@ apps/web/dist/
 apps/mobile/build/
 apps/mobile/.dart_tool/
 apps/mobile/ios/Pods/
+apps/mobile/devtools_options.yaml
 
 # estado local dos hooks .claude (não versionar)
 .claude/tdd-state.json

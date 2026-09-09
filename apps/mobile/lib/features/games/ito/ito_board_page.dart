@@ -70,7 +70,7 @@ class _ItoBoardPageState extends ConsumerState<ItoBoardPage> {
             ),
             const SizedBox(height: 4),
             Text('Do menor pro maior', style: text.headlineSmall),
-            Text('Segura e arrasta pra ordenar. Só as dicas — nada de números.',
+            Text('Arraste pela alça (à direita) pra ordenar. Só as dicas — nada de números.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: CjTokens.muted)),
           ]),
@@ -79,6 +79,9 @@ class _ItoBoardPageState extends ConsumerState<ItoBoardPage> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: order.length,
             onReorderItem: _onReorderItem,
+            // Só a alça arrasta (imediato, sem long-press) — evita briga de
+            // gesto com a rolagem da tela.
+            buildDefaultDragHandles: false,
             proxyDecorator: (child, _, _) => Material(
               color: Colors.transparent,
               child: child,
@@ -120,7 +123,14 @@ class _ItoBoardPageState extends ConsumerState<ItoBoardPage> {
                           ],
                         ),
                       ),
-                      Icon(Icons.drag_handle, color: CjTokens.muted, size: 20),
+                      ReorderableDragStartListener(
+                        index: i,
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: Icon(Icons.drag_handle,
+                              color: CjTokens.muted, size: 22),
+                        ),
+                      ),
                     ],
                   ),
                 ),
